@@ -10,7 +10,6 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-install -j$(nproc) gd mysqli pdo_mysql zip
 
 RUN a2enmod rewrite
-RUN a2enmod headers
 RUN service apache2 restart
 
 COPY apache-config.conf /etc/apache2/sites-available/000-default.conf
