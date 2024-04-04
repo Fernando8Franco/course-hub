@@ -58,4 +58,56 @@ Flight::route('POST /users', function () {
   }
 });
 
+Flight::route('PUT /user/@id', function ($id) {
+  try {
+    $conn = Flight::db();
+
+    $data = Flight::request()->data;
+    $name = $data->name;
+    $father_last_name = $data->father_last_name;
+    $mother_last_name = $data->mother_last_name;
+    $password = $data->password;
+    $birthday = $data->birthday;
+    $phone_number = $data->phone_number;
+    $email = $data->email;
+    $user_type = $data->user_type;
+    $is_active = $data->is_active;
+
+    $stmt = $conn->prepare("UPDATE user SET name = ?, father_last_name = ?, mother_last_name = ?, password = ?, birthday = ?, phone_number = ?, email = ?, user_type = ?, is_active = ?
+    WHERE id = ?");
+    $stmt->bind_param('ssssssssii', $name, $father_last_name, $mother_last_name, $password, $birthday, $phone_number, $email, $user_type, $is_active, $id);
+    $stmt->execute();
+    $rows = $stmt->affected_rows;
+
+    if ($rows == 0) {
+      Flight::json(array('warning' => "No changes were made to the user with id {$id}"), 200);
+    } else {
+      Flight::json(array('success' => 'User changed correctly', 'affected rows' => $rows), 200);
+    }
+
+  } catch (Exception $e) {
+    Flight::json(array('error' => $e->getMessage()), 400);
+  }
+});
+
+Flight::route('DELETE /user/@id', function ($id) {
+  try {
+    $conn = Flight::db();
+
+    $stmt = $conn->prepare("DELETE FROM user WHERE id = ?");
+    $stmt->bind_param('i', $id);
+    $stmt->execute();
+    $rows = $stmt->affected_rows;
+
+    if ($rows == 0) {
+      Flight::json(array('warning' => "The user with id: {$id} dont exist"), 200);
+    } else {
+      Flight::json(array('success' => 'User changed correctly', 'affected rows' => $rows), 200);
+    }
+
+  } catch (Exception $e) {
+    Flight::json(array('error' => $e->getMessage()), 400);
+  }
+});
+
 Flight::start();
