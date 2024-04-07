@@ -4,11 +4,10 @@ header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 
 require 'vendor/autoload.php';
-require 'services/UserService.php';
 
 Flight::register('db', mysqli::class, ['course-hub-mysql-1', 'root', 'Fernand0101', 'CourseHubDB']);
 
-$user = new UserService();
+$user = new Services\UserService;
 
 //USER ROUTES
 Flight::route('GET /users', [$user, 'getAll']);

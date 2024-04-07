@@ -1,6 +1,8 @@
 <?php
 
+namespace Services;
 require_once 'TokenService.php';
+use flight;
 
 class UserService {
 
