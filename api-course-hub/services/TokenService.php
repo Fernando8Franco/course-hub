@@ -30,9 +30,9 @@ function getToken() {
   return $token;
 }
 
-function validateToken() {
+function validateToken($t) {
   $key = '&VAv,Bw3BJ7nx+Q8m-yc2_E8WFLigl7RPo)0$l-us6j2[un=w~';
-  $token = getToken();
+  $token = $t;
 
   try {
     $decode_token_data = JWT::decode($token, new Key($key, 'HS256'));
@@ -52,9 +52,16 @@ function validateToken() {
   return $result['valid_user'] ? $decode_token_data : false;
 }
 
-function tokenData() {
-  if (!validateToken())
+function tokenData($token = null) {
+  if (!is_null($token)) {
+    if (!validateToken($token))
+      Flight::halt(401, json_encode(['status' => 'error', 'message' => 'Unauthorized - The token data is not valid'])); 
+
+    return validateToken($token);
+  }
+
+  if (!validateToken(getToken()))
     Flight::halt(401, json_encode(['status' => 'error', 'message' => 'Unauthorized - The token data is not valid']));
 
-  return validateToken();
+  return validateToken(getToken());
 }
