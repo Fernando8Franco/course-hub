@@ -58,8 +58,8 @@ class UserService {
     }
 
     function create() {
-        // if (tokenData()->user_type != 'ADMIN')
-        //     Flight::halt(403, json_encode(['status' => 'error', 'message' => 'Unauthorized request']));
+        if (tokenData()->user_type != 'ADMIN')
+            Flight::halt(403, json_encode(['status' => 'error', 'message' => 'Unauthorized request']));
       
         try {
             $data = Flight::request()->data;
@@ -143,7 +143,6 @@ class UserService {
             $stmt = Flight::db()->prepare("UPDATE user SET password = ? WHERE id = ?");
             $stmt->bind_param('si', $enc_password, $id);
             $stmt->execute();
-            $rows = $stmt->affected_rows;
             $stmt->close();
             Flight::db()->close();
         
@@ -160,7 +159,7 @@ class UserService {
             $email = $data->email;
             $token = bin2hex(random_bytes(16));
             $token_hash = hash('sha256', $token);
-            $expiry = date('Y-m-d H:i:s', time() + 900);
+            $expiry = date('Y-m-d H:i:s', time() + 10000);
         
             $stmt = Flight::db()->prepare("UPDATE user SET reset_token_hash = ?, reset_token_expires_at = ? WHERE email = ?");
             $stmt->bind_param('sss', $token_hash, $expiry, $email);
@@ -169,30 +168,56 @@ class UserService {
             if ($stmt->affected_rows == 0)
                 Flight::halt(400, json_encode(['status' => 'warning', 'message' => 'Wrong Email']));
 
-            
+            try {
+                $mail = require "MailerService.php";
+    
+                $mail->setFrom($_ENV['MAILER_ADDRESS'], 'No reply');
+                $mail->addAddress($email);
+                $mail->Subject = 'Reseteo de contraseña';
+                $mail->CharSet = 'UTF-8';
+                $mail->Body = <<<END
+                Haga click <a href="{$_ENV['HOST']}/reset-password/{$token}">aquí</a> para cambiar su contraseña.
+                END;
+
+                try {
+                    $mail->send();
+                } catch (Exception $e) {
+                    Flight::json(array('status' => 'error', 'message' => $e->getMessage()), 400);
+                }
+            } catch (Exception $e) {
+                Flight::json(array('status' => 'error', 'message' => $e->getMessage()), 400);
+            }
         
-            Flight::json(array('status' => 'success', 'message' => 'User reset token updated correctly'), 200);
+            Flight::json(array('status' => 'success', 'message' => 'Email send correctly'), 200);
         } catch (Exception $e) {
             Flight::json(array('status' => 'error', 'message' => $e->getMessage()), 400);
         }
     }
 
-    function updatePasswordByToken($token) {
+    function updatePasswordByToken() {
         try {
             $data = Flight::request()->data;
+            $token = $data->token;
             $password = $data->password;
 
+            $token_hash = hash('sha256', $token);
             $enc_password = password_hash($password, PASSWORD_DEFAULT);
         
-            $stmt = Flight::db()->prepare("UPDATE user SET password = ? WHERE id = ?");
-            $stmt->bind_param('si', $enc_password, tokenData()->user_id);
+            $stmt = Flight::db()->prepare("SELECT id, reset_token_expires_at FROM user WHERE reset_token_hash = ?");
+            $stmt->bind_param('s', $token_hash);
             $stmt->execute();
-            $rows = $stmt->affected_rows;
+            $result = $stmt->get_result()->fetch_assoc();
+            
+            if (is_null($result) || strtotime($result['reset_token_expires_at']) <= time())
+                Flight::halt(403, json_encode(['status' => 'error', 'message' => 'Token not valid']));
+        
+            $stmt = Flight::db()->prepare("UPDATE user SET password = ?, reset_token_hash = NULL, reset_token_expires_at = NULL WHERE id = ?");
+            $stmt->bind_param('si', $enc_password, $result['id']);
+            $stmt->execute();
             $stmt->close();
             Flight::db()->close();
-        
+
             Flight::json(array('status' => 'success', 'message' => 'User password changed correctly'), 200);
-            
         } catch (Exception $e) {
             Flight::json(array('status' => 'error', 'message' => $e->getMessage()), 400);
         }
