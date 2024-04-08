@@ -214,7 +214,7 @@ class UserService {
                 try {
                     $mail->send();
                 } catch (Exception $e) {
-                    Flight::json(array('status' => 'error', 'message' => $e->getMessage()), 400);
+                    Flight::halt(400, json_encode(['status' => 'error', 'message' => $e->getMessage()]));
                 }
             } catch (Exception $e) {
                 Flight::json(array('status' => 'error', 'message' => $e->getMessage()), 400);
@@ -241,7 +241,7 @@ class UserService {
             $result = $stmt->get_result()->fetch_assoc();
             
             if (is_null($result) || strtotime($result['reset_token_expires_at']) <= time())
-                Flight::halt(403, json_encode(['status' => 'error', 'message' => 'Token not valid']));
+                Flight::halt(400, json_encode(['status' => 'error', 'message' => 'Token not valid']));
         
             $stmt = Flight::db()->prepare("UPDATE user SET password = ?, reset_token_hash = NULL, reset_token_expires_at = NULL WHERE id = ?");
             $stmt->bind_param('si', $enc_password, $result['id']);
