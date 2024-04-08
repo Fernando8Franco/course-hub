@@ -12,7 +12,10 @@ Flight::register('db', mysqli::class, [$_ENV['DB_HOST'], $_ENV['DB_USER'], $_ENV
 
 $user = new Services\UserService;
 
-//USER ROUTES
+// TEST ROUTE
+Flight::route('GET /', function(){echo 'it works';});
+
+// USER ROUTES
 Flight::route('GET /users', [$user, 'getAll']);
 Flight::route('GET /user/@id', [$user, 'getOne']);
 Flight::route('GET /user', [$user, 'getUserData']);
