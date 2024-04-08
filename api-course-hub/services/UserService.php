@@ -3,6 +3,7 @@
 namespace Services;
 require_once 'TokenService.php';
 use flight;
+use Exception;
 
 class UserService {
 
