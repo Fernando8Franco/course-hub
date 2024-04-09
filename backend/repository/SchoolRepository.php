@@ -1,6 +1,7 @@
 <?php
 
 namespace Repository;
+
 use flight;
 use Exception;
 

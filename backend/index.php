@@ -13,6 +13,7 @@ mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
 $user = new Services\UserService;
 $school = new Services\SchoolService;
+$course = new Services\CourseService;
 
 // TEST ROUTE
 Flight::route('GET /', function(){echo 'it works';});
@@ -43,5 +44,15 @@ Flight::route('POST /school', [$school, 'create']);
 Flight::route('PUT /school', [$school, 'update']);
 
 Flight::route('DELETE /school/@id', [$school, 'delete']);
+
+// COURSE ROUTES
+Flight::route('GET /courses', [$course, 'getAll']);
+Flight::route('GET /course/@id', [$course, 'getOne']);
+
+Flight::route('POST /course', [$course, 'create']);
+
+Flight::route('PUT /course', [$course, 'update']);
+
+Flight::route('DELETE /course/@id', [$course, 'delete']);
 
 Flight::start();
