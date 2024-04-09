@@ -34,23 +34,13 @@ class SchoolRepository {
         }
     }
 
-    public static function verifySchool($name) {
+    public static function save($data) {
         try {
-            $stmt = Flight::db()->prepare("SELECT EXISTS (SELECT id FROM school WHERE name = ?) as school_exist");
-            $stmt->bind_param('s', $name);
-            $stmt->execute();
-            $result = $stmt->get_result()->fetch_assoc();
+            $name = $data->name;
+            $is_active = $data->is_active;
 
-            return $result;
-        } catch (Exception $e) {
-            Flight::halt(400, json_encode(['status' => 'error', 'message' => $e->getMessage()]));
-        }
-    }
-
-    public static function save($name) {
-        try {
-            $stmt = Flight::db()->prepare("INSERT INTO school (name) VALUES (?);");
-            $stmt->bind_param('s', $name);
+            $stmt = Flight::db()->prepare("INSERT INTO school (name, is_active) VALUES (?,?);");
+            $stmt->bind_param('si', $name, $is_active);
             $stmt->execute();
             $stmt->close();
             Flight::db()->close();
@@ -62,10 +52,14 @@ class SchoolRepository {
         }
     }
 
-    public static function update($id, $name) {
+    public static function update($data) {
         try {
-            $stmt = Flight::db()->prepare("UPDATE school SET name = ? WHERE id = ?;");
-            $stmt->bind_param('si', $name, $id);
+            $id = $data->id;
+            $name = $data->name;
+            $is_active = $data->is_active;
+
+            $stmt = Flight::db()->prepare("UPDATE school SET name = ?, is_active = ? WHERE id = ?;");
+            $stmt->bind_param('sii', $name, $is_active, $id);
             $stmt->execute();
             $stmt->close();
             Flight::db()->close();

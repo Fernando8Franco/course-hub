@@ -79,24 +79,6 @@ class UserRepository {
         }
     }
 
-    public static function verifyEmail($email, $id = null) {
-        try {
-            if (is_null($id)) {
-                $stmt = Flight::db()->prepare("SELECT EXISTS (SELECT id FROM user WHERE email = ?) as email_exist");
-                $stmt->bind_param('s', $email);
-            } else {
-                $stmt = Flight::db()->prepare("SELECT EXISTS (SELECT id FROM user WHERE email = ? AND id != ?) as email_exist");
-                $stmt->bind_param('si', $email, $id);
-            }
-            $stmt->execute();
-            $result = $stmt->get_result()->fetch_assoc();
-
-            return $result;
-        } catch (Exception $e) {
-            Flight::halt(400, json_encode(['status' => 'error', 'message' => $e->getMessage()]));
-        }
-    }
-
     public static function saveAdmin($data) {
         try {
             $name = $data->name;
@@ -267,7 +249,7 @@ class UserRepository {
 
             if ($rows == 0)
                 throw new Exception("The user with id: {$id} dont exist");
-            
+
         } catch (Exception $e) {
             Flight::halt(400, json_encode(['status' => 'error', 'message' => $e->getMessage()]));
         }

@@ -34,9 +34,8 @@ class SchoolService {
         validateAdmin($token_data->user_type);
 
         $data = Flight::request()->data;
-        $name = $data->name;
 
-        SchoolRepository::save($name);
+        SchoolRepository::save($data);
     
         Flight::json(array('status' => 'success', 'message' => 'School stored correctly'), 200);
     }
@@ -47,10 +46,8 @@ class SchoolService {
         validateAdmin($token_data->user_type);
 
         $data = Flight::request()->data;
-        $id = $data->id;
-        $name = $data->name;
 
-        SchoolRepository::update($id, $name);
+        SchoolRepository::update($data);
     
         Flight::json(array('status' => 'success', 'message' => 'School updated correctly'), 200);
     }
