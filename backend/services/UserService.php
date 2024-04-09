@@ -10,8 +10,7 @@ class UserService {
     function getAll() {
         $token_data = tokenData();
 
-        if ($token_data->user_type != 'ADMIN')
-            Flight::halt(403, json_encode(['status' => 'error', 'message' => 'Unauthorized request']));
+        validateAdmin($token_data->user_type);
       
         $result = UserRepository::getAll();
 
@@ -21,8 +20,7 @@ class UserService {
     function getOne($id) {
         $token_data = tokenData();
 
-        if ($token_data->user_type != 'ADMIN')
-            Flight::halt(403, json_encode(['status' => 'error', 'message' => 'Unauthorized request']));
+        validateAdmin($token_data->user_type);
         
         $result = UserRepository::getOne($id);    
 
@@ -48,7 +46,7 @@ class UserService {
         $result = UserRepository::getAuthInfo($email);
     
         if (is_null($result) || !password_verify($password, $result['password'])) 
-            Flight::halt(400, json_encode(['status' => 'error', 'message' => 'Wrong password or user']));
+            Flight::halt(400, json_encode(['status' => 'error', 'message' => 'Wrong password or email']));
         
         $token = encodeToken($result['id'], $result['user_type']);
     
@@ -58,8 +56,7 @@ class UserService {
     function createAdmin() {
         $token_data = tokenData();
 
-        if ($token_data->user_type != 'ADMIN')
-            Flight::halt(403, json_encode(['status' => 'error', 'message' => 'Unauthorized request']));
+        validateAdmin($token_data->user_type);
       
         $data = Flight::request()->data;
         $email = $data->email;
@@ -118,12 +115,32 @@ class UserService {
         try {
             $mail = require "MailerService.php";
 
-            $mail->setFrom($_ENV['MAILER_ADDRESS'], 'No reply');
+            $mail->setFrom('no-reply@gmail.com', 'GARZA COURSE HUB');
             $mail->addAddress($email);
-            $mail->Subject = 'Reseteo de contraseña';
+            $mail->Subject = 'Cambio de contraseña';
             $mail->CharSet = 'UTF-8';
             $mail->Body = <<<END
-            Haga click <a href="{$_ENV['HOST']}/reset-password/{$token}">aquí</a> para cambiar su contraseña.
+            <html>
+            <head>
+                <style>
+                    /* Estilos para el cuerpo del correo */
+                    body {
+                        font-family: Arial, sans-serif;
+                        font-size: 14px;
+                    }
+                    a {
+                        color: #007bff;
+                        text-decoration: none;
+                    }
+                    a:hover {
+                        text-decoration: underline;
+                    }
+                </style>
+            </head>
+            <body>
+                Haga click <a href="{$_ENV['HOST']}/reset-password/{$token}">aquí</a> para cambiar su contraseña.
+            </body>
+            </html>
             END;
                 
             $mail->send();
@@ -160,8 +177,7 @@ class UserService {
     function update($id) {
         $token_data = tokenData();
 
-        if ($token_data->user_type != 'ADMIN')
-            Flight::halt(403, json_encode(['status' => 'error', 'message' => 'Unauthorized request']));
+        validateAdmin($token_data->user_type);
         
         $data = Flight::request()->data;
         $email = $data->email;
@@ -179,8 +195,7 @@ class UserService {
     function updateCostumer() {
         $token_data = tokenData();
 
-        if ($token_data->user_type != 'COSTUMER')
-            Flight::halt(403, json_encode(['status' => 'error', 'message' => 'Unauthorized request']));
+        validateCostumer($token_data->user_type);
         
         $data = Flight::request()->data;
         $email = $data->email;
@@ -217,8 +232,7 @@ class UserService {
     function delete($id) {
         $token_data = tokenData();
 
-        if ($token_data->user_type != 'ADMIN')
-            Flight::halt(403, json_encode(['status' => 'error', 'message' => 'Unauthorized request']));
+        validateAdmin($token_data->user_type);
         
         $rows = UserRepository::eliminate($id);
 
@@ -227,4 +241,14 @@ class UserService {
     
         Flight::json(array('status' => 'success', 'message' => 'User deleted correctly'), 200);
     }
+}
+
+function validateAdmin($user_type) {
+    if ($user_type != 'ADMIN')
+            Flight::halt(403, json_encode(['status' => 'error', 'message' => 'Unauthorized request']));
+}
+
+function validateCostumer($user_type) {
+    if ($user_type != 'COSTUMER')
+            Flight::halt(403, json_encode(['status' => 'error', 'message' => 'Unauthorized request']));
 }
