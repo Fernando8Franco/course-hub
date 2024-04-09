@@ -24,5 +24,5 @@ try {
 
     return $mail;
 } catch (Exception $e) {
-    Flight::json(array('status' => 'error', 'message' => $e->getMessage()), 400);
+    Flight::halt(400, json_encode(['status' => 'error', 'message' => $e->getMessage()]));
 }

@@ -18,7 +18,7 @@ Flight::route('GET /', function(){echo 'it works';});
 // USER ROUTES
 Flight::route('GET /users', [$user, 'getAll']);
 Flight::route('GET /user/@id', [$user, 'getOne']);
-Flight::route('GET /user', [$user, 'getUserData']);
+Flight::route('GET /user', [$user, 'getOneByToken']);
 
 Flight::route('POST /auth', [$user, 'auth']);
 Flight::route('POST /user-admin', [$user, 'createAdmin']);

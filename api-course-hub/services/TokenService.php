@@ -47,7 +47,7 @@ function validateToken($t) {
         $stmt->execute();
         $result = $stmt->get_result()->fetch_assoc();
     } catch (Exception $e) {
-        Flight::json(array(['status' => 'error', 'message' => $e->getMessage()]), 400);
+        Flight::halt(400, json_encode(['status' => 'error', 'message' => $e->getMessage()]));
     }
     
     return $result['valid_user'] ? $decode_token_data : false;
