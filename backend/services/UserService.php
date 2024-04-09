@@ -1,6 +1,7 @@
 <?php
 
 namespace Services;
+
 require_once 'TokenService.php';
 use flight;
 use Exception;
@@ -153,25 +154,21 @@ class UserService {
     }
 
     function resetPassword() {
-        try {
-            $data = Flight::request()->data;
-            $token = $data->token;
-            $password = $data->password;
+        $data = Flight::request()->data;
+        $token = $data->token;
+        $password = $data->password;
 
-            $token_hash = hash('sha256', $token);
-            
-            $result = UserRepository::getResetInfor($token_hash);
-            
-            if (is_null($result) || strtotime($result['reset_token_expires_at']) <= time())
-                Flight::halt(400, json_encode(['status' => 'error', 'message' => 'Token not valid']));
+        $token_hash = hash('sha256', $token);
+        
+        $result = UserRepository::getResetInfor($token_hash);
+        
+        if (is_null($result) || strtotime($result['reset_token_expires_at']) <= time())
+            Flight::halt(400, json_encode(['status' => 'error', 'message' => 'Token not valid']));
 
-            $enc_password = password_hash($password, PASSWORD_DEFAULT);
-            UserRepository::updateResetPassword($enc_password, $result['id']);
+        $enc_password = password_hash($password, PASSWORD_DEFAULT);
+        UserRepository::updateResetPassword($enc_password, $result['id']);
 
-            Flight::json(array('status' => 'success', 'message' => 'User password changed correctly'), 200);
-        } catch (Exception $e) {
-            Flight::json(array('status' => 'error', 'message' => $e->getMessage()), 400);
-        }
+        Flight::json(array('status' => 'success', 'message' => 'User password changed correctly'), 200);
     }
 
     function update($id) {

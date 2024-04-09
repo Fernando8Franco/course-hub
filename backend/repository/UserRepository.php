@@ -4,7 +4,6 @@ namespace Repository;
 
 use Exception;
 use flight;
-use Exeption;
 
 class UserRepository {
     public static function getAll() {

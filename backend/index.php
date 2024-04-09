@@ -12,6 +12,7 @@ Flight::register('db', mysqli::class, [$_ENV['DB_HOST'], $_ENV['DB_USER'], $_ENV
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
 $user = new Services\UserService;
+$school = new Services\SchoolService;
 
 // TEST ROUTE
 Flight::route('GET /', function(){echo 'it works';});
@@ -32,5 +33,15 @@ Flight::route('PUT /user-costumer', [$user, 'updateCostumer']);
 Flight::route('PUT /update-password', [$user, 'updatePassword']);
 
 Flight::route('DELETE /user/@id', [$user, 'delete']);
+
+// SCHOOL ROUTES
+Flight::route('GET /schools', [$school, 'getAll']);
+Flight::route('GET /school/@id', [$school, 'getOne']);
+
+Flight::route('POST /school', [$school, 'create']);
+
+Flight::route('PUT /school', [$school, 'update']);
+
+Flight::route('DELETE /school/@id', [$school, 'delete']);
 
 Flight::start();
