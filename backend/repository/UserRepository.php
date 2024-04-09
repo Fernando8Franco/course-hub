@@ -29,6 +29,9 @@ class UserRepository {
             $stmt->close();
             Flight::db()->close();
 
+            if (is_null($result))
+                throw new Exception("The user with id: {$id} dont exist");
+
             return $result;
         } catch (Exception $e) {
             Flight::halt(400, json_encode(['status' => 'error', 'message' => $e->getMessage()]));
@@ -43,6 +46,9 @@ class UserRepository {
             $result = $stmt->get_result()->fetch_assoc();
             $stmt->close();
             Flight::db()->close();
+
+            if (is_null($result))
+                throw new Exception('The user is not active');
 
             return $result;
         } catch (Exception $e) {
@@ -61,6 +67,11 @@ class UserRepository {
             }
             $stmt->execute();
             $result = $stmt->get_result()->fetch_assoc();
+
+            if (is_null($result) && !is_null($email)) 
+                throw new Exception('Wrong password or email');
+            else if (is_null($result) && !is_null($id))
+                throw new Exception('Wrong password');
 
             return $result;
         } catch (Exception $e) {
@@ -91,26 +102,28 @@ class UserRepository {
             $name = $data->name;
             $father_last_name = $data->father_last_name;
             $mother_last_name = $data->mother_last_name;
-            $password = $data->password;
+            $password = password_hash($data->password, PASSWORD_DEFAULT);
             $birthday = $data->birthday;
             $phone_number = $data->phone_number;
             $email = $data->email;
             $user_type = 'ADMIN';
             $is_active = $data->is_active;
-            $enc_password = password_hash($password, PASSWORD_DEFAULT);
             
             $stmt = Flight::db()->prepare("INSERT INTO user (name, father_last_name, mother_last_name, password, birthday, phone_number, email, user_type, is_active)
             VALUES (?,?,?,?,?,?,?,?,?);");
-            $stmt->bind_param('ssssssssi', $name, $father_last_name, $mother_last_name, $enc_password, $birthday, $phone_number, $email, $user_type, $is_active);
+            $stmt->bind_param('ssssssssi', $name, $father_last_name, $mother_last_name, $password, $birthday, $phone_number, $email, $user_type, $is_active);
             $stmt->execute();
             $stmt->close();
             Flight::db()->close();
         } catch (Exception $e) {
-            Flight::halt(400, json_encode(['status' => 'error', 'message' => $e->getMessage()]));
+            if (str_starts_with($e->getMessage(), 'Duplicate'))
+                Flight::halt(400, json_encode(['status' => 'warning', 'message' => 'The email is already registered']));
+            else
+                Flight::halt(400, json_encode(['status' => 'error', 'message' => $e->getMessage()]));
         }
     }
 
-    public static function saveCostumer($data) {
+    public static function saveCustomer($data) {
         try {
             $name = $data->name;
             $father_last_name = $data->father_last_name;
@@ -119,7 +132,7 @@ class UserRepository {
             $birthday = $data->birthday;
             $phone_number = $data->phone_number;
             $email = $data->email;
-            $user_type = 'COSTUMER';
+            $user_type = 'CUSTOMER';
             $is_active = $data->is_active;
             $enc_password = password_hash($password, PASSWORD_DEFAULT);
 
@@ -130,7 +143,10 @@ class UserRepository {
             $stmt->close();
             Flight::db()->close();
         } catch (Exception $e) {
-            Flight::halt(400, json_encode(['status' => 'error', 'message' => $e->getMessage()]));
+            if (str_starts_with($e->getMessage(), 'Duplicate'))
+                Flight::halt(400, json_encode(['status' => 'warning', 'message' => 'The email is already registered']));
+            else
+                Flight::halt(400, json_encode(['status' => 'error', 'message' => $e->getMessage()]));
         }
     }
 
@@ -147,13 +163,18 @@ class UserRepository {
         }
     }
 
-    public static function updateToken($token, $expiry, $reset_request, $email) {
+    public static function updateResetToken($token, $expiry, $reset_request, $email) {
         try {
             $stmt = Flight::db()->prepare("UPDATE user SET reset_token_hash = ?, reset_token_expires_at = ?, last_reset_request = ? WHERE email = ?");
             $stmt->bind_param('ssss', $token, $expiry, $reset_request, $email);
             $stmt->execute();
+            $rows = $stmt->affected_rows;
+            $stmt->close();
+            Flight::db()->close();
 
-            return $stmt->affected_rows;
+            if ($rows == 0)
+                Flight::halt(200, json_encode(['status' => 'success', 'message' => 'Email send correctly']));
+            
         } catch (Exception $e) {
             Flight::halt(400, json_encode(['status' => 'error', 'message' => $e->getMessage()]));
         }
@@ -165,6 +186,9 @@ class UserRepository {
             $stmt->bind_param('s', $token);
             $stmt->execute();
             $result = $stmt->get_result()->fetch_assoc();
+
+            if (is_null($result)) 
+                throw new Exception('Token not valid');
 
             return $result;
         } catch (Exception $e) {
@@ -184,8 +208,9 @@ class UserRepository {
         }
     }
 
-    public static function updateByAdmin($data, $id) {
+    public static function updateByAdmin($data) {
         try {
+            $id = $data->id;
             $name = $data->name;
             $father_last_name = $data->father_last_name;
             $mother_last_name = $data->mother_last_name;
@@ -201,11 +226,14 @@ class UserRepository {
             $stmt->close();
             Flight::db()->close();
         } catch (Exception $e) {
-            Flight::halt(400, json_encode(['status' => 'error', 'message' => $e->getMessage()]));
+            if (str_starts_with($e->getMessage(), 'Duplicate'))
+                Flight::halt(400, json_encode(['status' => 'warning', 'message' => 'The email is already registered']));
+            else
+                Flight::halt(400, json_encode(['status' => 'error', 'message' => $e->getMessage()]));
         }
     }
 
-    public static function updateByCostumer($data, $id) {
+    public static function updateByCustomer($data, $id) {
         try {
             $name = $data->name;
             $father_last_name = $data->father_last_name;
@@ -221,7 +249,10 @@ class UserRepository {
             $stmt->close();
             Flight::db()->close();
         } catch (Exception $e) {
-            Flight::halt(400, json_encode(['status' => 'error', 'message' => $e->getMessage()]));
+            if (str_starts_with($e->getMessage(), 'Duplicate'))
+                Flight::halt(400, json_encode(['status' => 'warning', 'message' => 'The email is already registered']));
+            else
+                Flight::halt(400, json_encode(['status' => 'error', 'message' => $e->getMessage()]));
         }
     }
 
@@ -234,7 +265,9 @@ class UserRepository {
             $stmt->close();
             Flight::db()->close();
 
-            return $rows;
+            if ($rows == 0)
+                throw new Exception("The user with id: {$id} dont exist");
+            
         } catch (Exception $e) {
             Flight::halt(400, json_encode(['status' => 'error', 'message' => $e->getMessage()]));
         }

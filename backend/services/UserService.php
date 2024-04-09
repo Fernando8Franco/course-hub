@@ -33,9 +33,6 @@ class UserService {
 
         $result = UserRepository::getOneByActive($token_data->user_id);
 
-        if (is_null($result))
-            Flight::halt(400, json_encode(['status' => 'error', 'message' => 'The user is not active']));
-
         Flight::json($result, 200);
     }
 
@@ -46,7 +43,7 @@ class UserService {
         
         $result = UserRepository::getAuthInfo($email);
     
-        if (is_null($result) || !password_verify($password, $result['password'])) 
+        if (!password_verify($password, $result['password'])) 
             Flight::halt(400, json_encode(['status' => 'error', 'message' => 'Wrong password or email']));
         
         $token = encodeToken($result['id'], $result['user_type']);
@@ -60,28 +57,16 @@ class UserService {
         validateAdmin($token_data->user_type);
       
         $data = Flight::request()->data;
-        $email = $data->email;
-
-        $result = UserRepository::verifyEmail($email);
-
-        if ($result['email_exist']) 
-            Flight::halt(400, json_encode(['status' => 'warning', 'message' => 'The email is already registered']));
     
         UserRepository::saveAdmin($data);
     
         Flight::json(array('status' => 'success', 'message' => 'User stored correctly'), 200);
     }
 
-    function createCostumer() {
+    function createCustomer() {
         $data = Flight::request()->data;
-        $email = $data->email;
-
-        $result = UserRepository::verifyEmail($email);
-
-        if ($result['email_exist']) 
-            Flight::halt(400, json_encode(['status' => 'warning', 'message' => 'The email is already registered']));
     
-        UserRepository::saveCostumer($data);
+        UserRepository::saveCustomer($data);
     
         Flight::json(array('status' => 'success', 'message' => 'User stored correctly'), 200);
     }
@@ -108,10 +93,7 @@ class UserService {
         $expiry = date('Y-m-d H:i:s', time() + 1800);
         $reset_request = date('Y-m-d H:i:s', time());
     
-        $affected_rows = UserRepository::updateToken($token_hash, $expiry, $reset_request, $email);
-
-        if ($affected_rows == 0)
-            Flight::halt(200, json_encode(['status' => 'success', 'message' => 'Email send correctly']));
+        UserRepository::updateResetToken($token_hash, $expiry, $reset_request, $email);
 
         try {
             $mail = require "MailerService.php";
@@ -150,7 +132,6 @@ class UserService {
         }
     
         Flight::json(array('status' => 'success', 'message' => 'Email send correctly'), 200);
-        
     }
 
     function resetPassword() {
@@ -162,7 +143,7 @@ class UserService {
         
         $result = UserRepository::getResetInfor($token_hash);
         
-        if (is_null($result) || strtotime($result['reset_token_expires_at']) <= time())
+        if (strtotime($result['reset_token_expires_at']) <= time())
             Flight::halt(400, json_encode(['status' => 'error', 'message' => 'Token not valid']));
 
         $enc_password = password_hash($password, PASSWORD_DEFAULT);
@@ -171,38 +152,26 @@ class UserService {
         Flight::json(array('status' => 'success', 'message' => 'User password changed correctly'), 200);
     }
 
-    function update($id) {
+    function update() {
         $token_data = tokenData();
 
         validateAdmin($token_data->user_type);
         
         $data = Flight::request()->data;
-        $email = $data->email;
-
-        $result = UserRepository::verifyEmail($email, $id);
-
-        if ($result['email_exist']) 
-            Flight::halt(400, json_encode(['status' => 'warning', 'message' => 'The email is already registered']));
     
-        UserRepository::updateByAdmin($data, $id);
+        UserRepository::updateByAdmin($data);
     
         Flight::json(array('status' => 'success', 'message' => 'User changed correctly'), 200);
     }
 
-    function updateCostumer() {
+    function updateCustomer() {
         $token_data = tokenData();
 
-        validateCostumer($token_data->user_type);
+        validateCustomer($token_data->user_type);
         
         $data = Flight::request()->data;
-        $email = $data->email;
-
-        $result = UserRepository::verifyEmail($email, $token_data->user_id);
-
-        if ($result['email_exist']) 
-            Flight::halt(400, json_encode(['status' => 'warning', 'message' => 'The email is already registered']));
     
-        UserRepository::updateByCostumer($data, $token_data->user_id);
+        UserRepository::updateByCustomer($data, $token_data->user_id);
         
         Flight::json(array('status' => 'success', 'message' => 'User changed correctly'), 200);
     }
@@ -216,7 +185,7 @@ class UserService {
 
         $result = UserRepository::getAuthInfo(null, $token_data->user_id);
 
-        if (is_null($result) || !password_verify($old_password, $result['password'])) 
+        if (!password_verify($old_password, $result['password'])) 
             Flight::halt(400, json_encode(['status' => 'error', 'message' => 'Wrong password']));
 
         $enc_password = password_hash($new_password, PASSWORD_DEFAULT);
@@ -231,10 +200,7 @@ class UserService {
 
         validateAdmin($token_data->user_type);
         
-        $rows = UserRepository::eliminate($id);
-
-        if ($rows == 0)
-            Flight::halt(200, json_encode(['status' => 'warning', 'message' => "The user with id: {$id} dont exist"]));
+        UserRepository::eliminate($id);
     
         Flight::json(array('status' => 'success', 'message' => 'User deleted correctly'), 200);
     }
@@ -245,7 +211,7 @@ function validateAdmin($user_type) {
             Flight::halt(403, json_encode(['status' => 'error', 'message' => 'Unauthorized request']));
 }
 
-function validateCostumer($user_type) {
-    if ($user_type != 'COSTUMER')
+function validateCustomer($user_type) {
+    if ($user_type != 'CUSTOMER')
             Flight::halt(403, json_encode(['status' => 'error', 'message' => 'Unauthorized request']));
 }
