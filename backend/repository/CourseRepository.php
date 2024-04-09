@@ -47,7 +47,7 @@ class CourseRepository {
             $instructor = $data->instructor;
             $modality = $data->modality;
             $image = $data->image;
-            $is_active = $data->description;
+            $is_active = $data->is_active;
             $school_id = $data->school_id;
 
             $stmt = Flight::db()->prepare("INSERT INTO course (name, description, price, instructor, modality, image, is_active, school_id) 
@@ -57,7 +57,10 @@ class CourseRepository {
             $stmt->close();
             Flight::db()->close();
         } catch (Exception $e) {
-            Flight::halt(400, json_encode(['status' => 'error', 'message' => $e->getMessage()]));
+            if (str_starts_with($e->getMessage(), 'Duplicate'))
+                Flight::halt(400, json_encode(['status' => 'warning', 'message' => 'The image name is already registered']));
+            else
+                Flight::halt(400, json_encode(['status' => 'error', 'message' => $e->getMessage()]));
         }
     }
 
@@ -84,7 +87,10 @@ class CourseRepository {
             if ($rows == 0)
                 throw new Exception("The user with id: {$id} dont exist");
         } catch (Exception $e) {
-            Flight::halt(400, json_encode(['status' => 'error', 'message' => $e->getMessage()]));
+            if (str_starts_with($e->getMessage(), 'Duplicate'))
+                Flight::halt(400, json_encode(['status' => 'warning', 'message' => 'The image name is already registered']));
+            else
+                Flight::halt(400, json_encode(['status' => 'error', 'message' => $e->getMessage()]));
         }
     }
 
