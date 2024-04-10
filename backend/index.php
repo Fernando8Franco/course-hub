@@ -2,6 +2,7 @@
 
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
+date_default_timezone_set('America/Mexico_City');
 
 require 'vendor/autoload.php';
 
@@ -33,8 +34,7 @@ Flight::route('POST /reset-password', [$user, 'resetPassword']);
 Flight::route('PUT /user-admin', [$user, 'update']);
 Flight::route('PUT /user-customer', [$user, 'updateCustomer']);
 Flight::route('PUT /update-password', [$user, 'updatePassword']);
-
-Flight::route('DELETE /user/@id', [$user, 'delete']);
+Flight::route('PUT /user/@id/@state', [$user, 'deActivate']);
 
 // SCHOOL ROUTES
 Flight::route('GET /schools', [$school, 'getAll']);
@@ -58,10 +58,15 @@ Flight::route('DELETE /course/@id', [$course, 'delete']);
 
 // TRANSACTION ROUTES
 Flight::route('GET /transactions', [$transaction, 'getAll']);
-Flight::route('GET /transactions-pending', [$transaction, 'getPendingTransactions']);
-Flight::route('GET /transactions-pending-no-image', [$transaction, 'getPendingTransactionsNoImage']);
-Flight::route('GET /transactions-completed', [$transaction, 'getCompletedTransactions']);
-Flight::route('GET /transactions-canceled', [$transaction, 'getCanceledTransactions']);
+Flight::route('GET /transactions-pending-with-image', [$transaction, 'getPendingTransactionsWithImage']);
+Flight::route('GET /transactions/@state', [$transaction, 'getTransactionsByState']);
 Flight::route('GET /transaction/@id', [$transaction, 'getOne']);
+Flight::route('GET /transactions-customer', [$transaction, 'getAllByToken']);
+
+Flight::route('POST /transaction', [$transaction, 'create']);
+
+Flight::route('PUT /transaction/@id/@state', [$transaction, 'update']);
+
+Flight::route('DELETE /transaction/@id', [$transaction, 'delete']);
 
 Flight::start();

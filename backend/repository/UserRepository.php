@@ -89,11 +89,10 @@ class UserRepository {
             $phone_number = $data->phone_number;
             $email = $data->email;
             $user_type = 'ADMIN';
-            $is_active = $data->is_active;
             
-            $stmt = Flight::db()->prepare("INSERT INTO user (name, father_last_name, mother_last_name, password, birthday, phone_number, email, user_type, is_active)
-            VALUES (?,?,?,?,?,?,?,?,?);");
-            $stmt->bind_param('ssssssssi', $name, $father_last_name, $mother_last_name, $password, $birthday, $phone_number, $email, $user_type, $is_active);
+            $stmt = Flight::db()->prepare("INSERT INTO user (name, father_last_name, mother_last_name, password, birthday, phone_number, email, user_type)
+            VALUES (?,?,?,?,?,?,?,?);");
+            $stmt->bind_param('ssssssss', $name, $father_last_name, $mother_last_name, $password, $birthday, $phone_number, $email, $user_type);
             $stmt->execute();
             $stmt->close();
             Flight::db()->close();
@@ -110,17 +109,15 @@ class UserRepository {
             $name = $data->name;
             $father_last_name = $data->father_last_name;
             $mother_last_name = $data->mother_last_name;
-            $password = $data->password;
+            $password = password_hash($data->password, PASSWORD_DEFAULT);
             $birthday = $data->birthday;
             $phone_number = $data->phone_number;
             $email = $data->email;
             $user_type = 'CUSTOMER';
-            $is_active = $data->is_active;
-            $enc_password = password_hash($password, PASSWORD_DEFAULT);
 
-            $stmt = Flight::db()->prepare("INSERT INTO user (name, father_last_name, mother_last_name, password, birthday, phone_number, email, user_type, is_active)
-            VALUES (?,?,?,?,?,?,?,?,?);");
-            $stmt->bind_param('ssssssssi', $name, $father_last_name, $mother_last_name, $enc_password, $birthday, $phone_number, $email, $user_type, $is_active);
+            $stmt = Flight::db()->prepare("INSERT INTO user (name, father_last_name, mother_last_name, password, birthday, phone_number, email, user_type)
+            VALUES (?,?,?,?,?,?,?,?);");
+            $stmt->bind_param('ssssssss', $name, $father_last_name, $mother_last_name, $password, $birthday, $phone_number, $email, $user_type);
             $stmt->execute();
             $stmt->close();
             Flight::db()->close();
@@ -199,11 +196,10 @@ class UserRepository {
             $birthday = $data->birthday;
             $phone_number = $data->phone_number;
             $email = $data->email;
-            $is_active = $data->is_active;
 
             $stmt = Flight::db()->prepare("UPDATE user SET name = ?, father_last_name = ?, mother_last_name = ?, birthday = ?, phone_number = ?, email = ?, is_active = ?
             WHERE id = ?");
-            $stmt->bind_param('ssssssii', $name, $father_last_name, $mother_last_name, $birthday, $phone_number, $email, $is_active, $id);
+            $stmt->bind_param('ssssssi', $name, $father_last_name, $mother_last_name, $birthday, $phone_number, $email, $id);
             $stmt->execute();
             $stmt->close();
             Flight::db()->close();
@@ -238,20 +234,16 @@ class UserRepository {
         }
     }
 
-    public static function eliminate($id) {
+    public static function deActivate($id, $state) {
         try {
-            $stmt = Flight::db()->prepare("DELETE FROM user WHERE id = ?");
-            $stmt->bind_param('i', $id);
+            $stmt = Flight::db()->prepare("UPDATE user SET is_active = ? WHERE id = ? AND id != 1");
+            $stmt->bind_param('ii', $state, $id);
             $stmt->execute();
-            $rows = $stmt->affected_rows;
             $stmt->close();
             Flight::db()->close();
-
-            if ($rows == 0)
-                throw new Exception("The user with id: {$id} dont exist");
-
         } catch (Exception $e) {
-            Flight::halt(400, json_encode(['status' => 'error', 'message' => $e->getMessage()]));
+            if (str_starts_with($e->getMessage(), 'The user'))
+                Flight::halt(400, json_encode(['status' => 'error', 'message' => $e->getMessage()]));
         }
-    }
+    }    
 }

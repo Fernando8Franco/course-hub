@@ -80,12 +80,8 @@ class CourseRepository {
             WHERE id = ?");
             $stmt->bind_param('ssdsssiii', $name, $description, $price, $instructor, $modality, $image, $is_active, $school_id, $id);
             $stmt->execute();
-            $rows = $stmt->affected_rows;
             $stmt->close();
             Flight::db()->close();
-
-            if ($rows == 0)
-                throw new Exception("The user with id: {$id} dont exist");
         } catch (Exception $e) {
             if (str_starts_with($e->getMessage(), 'Duplicate'))
                 Flight::halt(400, json_encode(['status' => 'warning', 'message' => 'The image name is already registered']));

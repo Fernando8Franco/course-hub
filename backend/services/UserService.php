@@ -195,14 +195,20 @@ class UserService {
         Flight::json(array('status' => 'success', 'message' => 'User password changed correctly'), 200);
     }
 
-    function delete($id) {
+    function deActivate($id, $state) {
         $token_data = tokenData();
+
+        if ($state !== '0' && $state !== '1')
+            Flight::halt(400, json_encode(['status' => 'error', 'message' => 'State not valid']));
 
         validateAdmin($token_data->user_type);
         
-        UserRepository::eliminate($id);
+        UserRepository::deActivate($id, $state);
     
-        Flight::json(array('status' => 'success', 'message' => 'User deleted correctly'), 200);
+        if ($state)
+            Flight::json(array('status' => 'success', 'message' => 'User activated correctly'), 200);
+        else
+            Flight::json(array('status' => 'success', 'message' => 'User deactivated correctly'), 200);
     }
 }
 
