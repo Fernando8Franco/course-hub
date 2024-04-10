@@ -14,6 +14,7 @@ mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 $user = new Services\UserService;
 $school = new Services\SchoolService;
 $course = new Services\CourseService;
+$transaction = new Services\TransactionService;
 
 // TEST ROUTE
 Flight::route('GET /', function(){echo 'it works';});
@@ -54,5 +55,13 @@ Flight::route('POST /course', [$course, 'create']);
 Flight::route('PUT /course', [$course, 'update']);
 
 Flight::route('DELETE /course/@id', [$course, 'delete']);
+
+// TRANSACTION ROUTES
+Flight::route('GET /transactions', [$transaction, 'getAll']);
+Flight::route('GET /transactions-pending', [$transaction, 'getPendingTransactions']);
+Flight::route('GET /transactions-pending-no-image', [$transaction, 'getPendingTransactionsNoImage']);
+Flight::route('GET /transactions-completed', [$transaction, 'getCompletedTransactions']);
+Flight::route('GET /transactions-canceled', [$transaction, 'getCanceledTransactions']);
+Flight::route('GET /transaction/@id', [$transaction, 'getOne']);
 
 Flight::start();
