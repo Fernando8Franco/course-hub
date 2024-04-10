@@ -21,7 +21,7 @@ $transaction = new Services\TransactionService;
 Flight::route('GET /', function(){echo 'it works';});
 
 // USER ROUTES
-Flight::route('GET /users', [$user, 'getAll']);
+Flight::route('GET /users/@user_type', [$user, 'getAllByUserType']);
 Flight::route('GET /user/@id', [$user, 'getOne']);
 Flight::route('GET /user', [$user, 'getOneByToken']);
 
@@ -35,6 +35,8 @@ Flight::route('PUT /user-admin', [$user, 'update']);
 Flight::route('PUT /user-customer', [$user, 'updateCustomer']);
 Flight::route('PUT /update-password', [$user, 'updatePassword']);
 Flight::route('PUT /user/@id/@state', [$user, 'deActivate']);
+
+Flight::route('DELETE /user/@id/@state', [$user, 'delete']);
 
 // SCHOOL ROUTES
 Flight::route('GET /schools', [$school, 'getAll']);

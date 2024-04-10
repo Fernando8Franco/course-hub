@@ -8,12 +8,12 @@ use Exception;
 use Repository\UserRepository;
 
 class UserService {
-    function getAll() {
+    function getAllByUserType($user_type) {
         $token_data = tokenData();
 
         validateAdmin($token_data->user_type);
       
-        $result = UserRepository::getAll();
+        $result = UserRepository::getAllByUserType($user_type);
 
         Flight::json($result, 200);
     }
@@ -31,7 +31,7 @@ class UserService {
     function getOneByToken() {
         $token_data = tokenData();
 
-        $result = UserRepository::getOneByActive($token_data->user_id);
+        $result = UserRepository::getOneByToken($token_data->user_id);
 
         Flight::json($result, 200);
     }
@@ -77,8 +77,8 @@ class UserService {
 
         $result = UserRepository::getLastResetRequest($email);
 
-        if (!empty($result['last_reset_request'])) {
-            $last_reset_time = strtotime($result['last_reset_request']);
+        if (!$result) {
+            $last_reset_time = strtotime($result);
             $current_time = time();
             $time_difference = $current_time - $last_reset_time;
 

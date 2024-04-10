@@ -6,9 +6,15 @@ use Exception;
 use flight;
 
 class UserRepository {
-    public static function getAll() {
+    public static function getAllByUserType($user_type) {
         try {
-            $stmt = Flight::db()->prepare("SELECT id, name, father_last_name, mother_last_name, birthday, phone_number, email, user_type, is_active FROM user");
+            if ($user_type != 'admin' && $user_type != 'customer')
+                throw new Exception("The user type: {$user_type} dont exist");
+
+            $stmt = Flight::db()->prepare("SELECT id, name, father_last_name, mother_last_name, birthday, phone_number, email, user_type, is_active FROM user 
+            WHERE user_type = ?
+            ORDER BY is_active DESC, id ASC");
+            $stmt->bind_param('s', $user_type);
             $stmt->execute();
             $result = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             $stmt->close();
@@ -38,7 +44,7 @@ class UserRepository {
         }
     }
 
-    public static function getOneByActive($id) {
+    public static function getOneByToken($id) {
         try {
             $stmt = Flight::db()->prepare("SELECT id, name, father_last_name, mother_last_name, phone_number, email FROM user WHERE id = ? AND is_active = 1");
             $stmt->bind_param('i', $id);
@@ -136,7 +142,7 @@ class UserRepository {
             $stmt->execute();
             $result = $stmt->get_result()->fetch_assoc();
 
-            return $result;
+            return $result['last_reset_request'];
         } catch (Exception $e) {
             Flight::halt(400, json_encode(['status' => 'error', 'message' => $e->getMessage()]));
         }
