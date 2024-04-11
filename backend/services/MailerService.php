@@ -8,7 +8,7 @@ use PHPMailer\PHPMailer\Exception;
 use flight;
 
 class MailerService {
-    public static function sendEmail($email, $body) {
+    public static function sendEmail($email, $subject, $body) {
         try {
             $mail = new PHPMailer(true);
 
@@ -25,7 +25,7 @@ class MailerService {
 
             $mail->setFrom('no-reply@gmail.com');
             $mail->addAddress($email);
-            $mail->Subject = 'Cambio de contraseña';
+            $mail->Subject = $subject;
             $mail->CharSet = 'UTF-8';
         
             $mail->isHTML(true);

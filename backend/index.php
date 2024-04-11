@@ -6,7 +6,7 @@ date_default_timezone_set('America/Mexico_City');
 
 require 'vendor/autoload.php';
 
-$dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . "/../");
 $dotenv->load();
 
 Flight::register('db', mysqli::class, [$_ENV['DB_HOST'], $_ENV['DB_USER'], $_ENV['DB_PASSWORD'], $_ENV['DB_NAME'], intval($_ENV['DB_PORT'])]);
@@ -27,14 +27,15 @@ Flight::route('GET /user', [$user, 'getOneByToken']);
 
 Flight::route('POST /auth', [$user, 'auth']);
 Flight::route('POST /user/@user_type', [$user, 'create']);
+Flight::route('POST /user-verify', [$user, 'validateVerificationCode']);
 Flight::route('POST /send-reset-password-email', [$user, 'sendResetPasswordEmail']);
 Flight::route('POST /reset-password', [$user, 'resetPassword']);
 
 Flight::route('PUT /user', [$user, 'update']);
 Flight::route('PUT /update-password', [$user, 'updatePassword']);
-Flight::route('PUT /user/@id/@state', [$user, 'deActivate']);
+Flight::route('PUT /user/@id/@state', [$user, 'deBanUser']);
 
-Flight::route('DELETE /user/@id/@state', [$user, 'delete']);
+Flight::route('DELETE /user/@id', [$user, 'delete']);
 
 // SCHOOL ROUTES
 Flight::route('GET /schools', [$school, 'getAll']);
