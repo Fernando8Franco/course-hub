@@ -2,6 +2,7 @@
 
 namespace Repository;
 
+use Ramsey\Uuid\Uuid;
 use Exception;
 use flight;
 
@@ -11,9 +12,10 @@ class UserRepository {
             if ($user_type != 'admin' && $user_type != 'customer')
                 throw new Exception("The user type: {$user_type} dont exist");
 
-            $stmt = Flight::db()->prepare("SELECT id, name, father_last_name, mother_last_name, birthday, phone_number, email, user_type, is_active FROM user 
+            $stmt = Flight::db()->prepare("SELECT id, name, father_last_name, mother_last_name, birthday, phone_number, email, user_type, is_active 
+            FROM user 
             WHERE user_type = ?
-            ORDER BY is_active DESC, id ASC");
+            ORDER BY is_active DESC, name ASC");
             $stmt->bind_param('s', $user_type);
             $stmt->execute();
             $result = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
@@ -28,7 +30,9 @@ class UserRepository {
 
     public static function getOne($id) {
         try {
-            $stmt = Flight::db()->prepare("SELECT id, name, father_last_name, mother_last_name, birthday, phone_number, email, user_type, is_active FROM user WHERE id = ?");
+            $stmt = Flight::db()->prepare("SELECT id, name, father_last_name, mother_last_name, birthday, phone_number, email, user_type, is_active 
+            FROM user 
+            WHERE id = ?");
             $stmt->bind_param('i', $id);
             $stmt->execute();
             $result = $stmt->get_result()->fetch_assoc();
@@ -46,7 +50,10 @@ class UserRepository {
 
     public static function getOneByToken($id) {
         try {
-            $stmt = Flight::db()->prepare("SELECT id, name, father_last_name, mother_last_name, phone_number, email FROM user WHERE id = ? AND is_active = 1");
+            $stmt = Flight::db()->prepare("SELECT id, name, father_last_name, mother_last_name, phone_number, email 
+            FROM user 
+            WHERE id = ? 
+            AND is_active = 1");
             $stmt->bind_param('i', $id);
             $stmt->execute();
             $result = $stmt->get_result()->fetch_assoc();
@@ -54,7 +61,7 @@ class UserRepository {
             Flight::db()->close();
 
             if (is_null($result))
-                throw new Exception('The user is not active');
+                throw new Exception('The user is not exist');
 
             return $result;
         } catch (Exception $e) {
@@ -85,8 +92,9 @@ class UserRepository {
         }
     }
 
-    public static function saveAdmin($data) {
+    public static function save($user_type, $data) {
         try {
+            $id = Uuid::uuid4() . '-' . rand(0,999);
             $name = $data->name;
             $father_last_name = $data->father_last_name;
             $mother_last_name = $data->mother_last_name;
@@ -94,36 +102,11 @@ class UserRepository {
             $birthday = $data->birthday;
             $phone_number = $data->phone_number;
             $email = $data->email;
-            $user_type = 'ADMIN';
+            $last_reset_request = date('Y-m-d H:i:s', time());
             
-            $stmt = Flight::db()->prepare("INSERT INTO user (name, father_last_name, mother_last_name, password, birthday, phone_number, email, user_type)
-            VALUES (?,?,?,?,?,?,?,?);");
-            $stmt->bind_param('ssssssss', $name, $father_last_name, $mother_last_name, $password, $birthday, $phone_number, $email, $user_type);
-            $stmt->execute();
-            $stmt->close();
-            Flight::db()->close();
-        } catch (Exception $e) {
-            if (str_starts_with($e->getMessage(), 'Duplicate'))
-                Flight::halt(400, json_encode(['status' => 'warning', 'message' => 'The email is already registered']));
-            else
-                Flight::halt(400, json_encode(['status' => 'error', 'message' => $e->getMessage()]));
-        }
-    }
-
-    public static function saveCustomer($data) {
-        try {
-            $name = $data->name;
-            $father_last_name = $data->father_last_name;
-            $mother_last_name = $data->mother_last_name;
-            $password = password_hash($data->password, PASSWORD_DEFAULT);
-            $birthday = $data->birthday;
-            $phone_number = $data->phone_number;
-            $email = $data->email;
-            $user_type = 'CUSTOMER';
-
-            $stmt = Flight::db()->prepare("INSERT INTO user (name, father_last_name, mother_last_name, password, birthday, phone_number, email, user_type)
-            VALUES (?,?,?,?,?,?,?,?);");
-            $stmt->bind_param('ssssssss', $name, $father_last_name, $mother_last_name, $password, $birthday, $phone_number, $email, $user_type);
+            $stmt = Flight::db()->prepare("INSERT INTO user (id, name, father_last_name, mother_last_name, password, birthday, phone_number, email, user_type, last_reset_request)
+            VALUES (?,?,?,?,?,?,?,?,?,?);");
+            $stmt->bind_param('ssssssssss', $id, $name, $father_last_name, $mother_last_name, $password, $birthday, $phone_number, $email, $user_type, $last_reset_request);
             $stmt->execute();
             $stmt->close();
             Flight::db()->close();
@@ -184,7 +167,7 @@ class UserRepository {
     public static function updateResetPassword($password, $id) {
         try {
             $stmt = Flight::db()->prepare("UPDATE user SET password = ?, reset_token_hash = NULL, reset_token_expires_at = NULL WHERE id = ?");
-            $stmt->bind_param('si', $password, $id);
+            $stmt->bind_param('ss', $password, $id);
             $stmt->execute();
             $stmt->close();
             Flight::db()->close();
@@ -193,32 +176,9 @@ class UserRepository {
         }
     }
 
-    public static function updateByAdmin($data) {
+    public static function update($data, $id = null) {
         try {
-            $id = $data->id;
-            $name = $data->name;
-            $father_last_name = $data->father_last_name;
-            $mother_last_name = $data->mother_last_name;
-            $birthday = $data->birthday;
-            $phone_number = $data->phone_number;
-            $email = $data->email;
-
-            $stmt = Flight::db()->prepare("UPDATE user SET name = ?, father_last_name = ?, mother_last_name = ?, birthday = ?, phone_number = ?, email = ?, is_active = ?
-            WHERE id = ?");
-            $stmt->bind_param('ssssssi', $name, $father_last_name, $mother_last_name, $birthday, $phone_number, $email, $id);
-            $stmt->execute();
-            $stmt->close();
-            Flight::db()->close();
-        } catch (Exception $e) {
-            if (str_starts_with($e->getMessage(), 'Duplicate'))
-                Flight::halt(400, json_encode(['status' => 'warning', 'message' => 'The email is already registered']));
-            else
-                Flight::halt(400, json_encode(['status' => 'error', 'message' => $e->getMessage()]));
-        }
-    }
-
-    public static function updateByCustomer($data, $id) {
-        try {
+            $id = $id ?? $data->id;
             $name = $data->name;
             $father_last_name = $data->father_last_name;
             $mother_last_name = $data->mother_last_name;
@@ -228,7 +188,7 @@ class UserRepository {
 
             $stmt = Flight::db()->prepare("UPDATE user SET name = ?, father_last_name = ?, mother_last_name = ?, birthday = ?, phone_number = ?, email = ?
             WHERE id = ?");
-            $stmt->bind_param('ssssssi', $name, $father_last_name, $mother_last_name, $birthday, $phone_number, $email, $id);
+            $stmt->bind_param('sssssss', $name, $father_last_name, $mother_last_name, $birthday, $phone_number, $email, $id);
             $stmt->execute();
             $stmt->close();
             Flight::db()->close();

@@ -26,13 +26,11 @@ Flight::route('GET /user/@id', [$user, 'getOne']);
 Flight::route('GET /user', [$user, 'getOneByToken']);
 
 Flight::route('POST /auth', [$user, 'auth']);
-Flight::route('POST /user-admin', [$user, 'createAdmin']);
-Flight::route('POST /user-customer', [$user, 'createCustomer']);
+Flight::route('POST /user/@user_type', [$user, 'create']);
 Flight::route('POST /send-reset-password-email', [$user, 'sendResetPasswordEmail']);
 Flight::route('POST /reset-password', [$user, 'resetPassword']);
 
-Flight::route('PUT /user-admin', [$user, 'update']);
-Flight::route('PUT /user-customer', [$user, 'updateCustomer']);
+Flight::route('PUT /user', [$user, 'update']);
 Flight::route('PUT /update-password', [$user, 'updatePassword']);
 Flight::route('PUT /user/@id/@state', [$user, 'deActivate']);
 
