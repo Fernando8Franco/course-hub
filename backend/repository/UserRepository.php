@@ -9,13 +9,11 @@ use flight;
 class UserRepository {
     public static function getAllByUserType($user_type) {
         try {
-            if ($user_type != 'admin' && $user_type != 'customer')
-                throw new Exception("The user type: {$user_type} dont exist");
-
-            $stmt = Flight::db()->prepare("SELECT id, name, father_last_name, mother_last_name, birthday, phone_number, email, user_type, is_active 
+            $stmt = Flight::db()->prepare("SELECT id, name, father_last_name, 
+            mother_last_name, birthday, phone_number, email, user_type, is_active, verification_code
             FROM user 
             WHERE user_type = ?
-            ORDER BY is_active DESC, name ASC");
+            ORDER BY is_active DESC, verification_code DESC, name ASC");
             $stmt->bind_param('s', $user_type);
             $stmt->execute();
             $result = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
@@ -24,16 +22,17 @@ class UserRepository {
 
             return $result;
         } catch (Exception $e) {
-            Flight::halt(400, json_encode(['status' => 'error', 'message' => $e->getMessage()]));
+            Flight::error($e);
         }
     }
 
     public static function getOne($id) {
         try {
-            $stmt = Flight::db()->prepare("SELECT id, name, father_last_name, mother_last_name, birthday, phone_number, email, user_type, is_active 
+            $stmt = Flight::db()->prepare("SELECT id, name, father_last_name, 
+            mother_last_name, birthday, phone_number, email, user_type, is_active 
             FROM user 
             WHERE id = ?");
-            $stmt->bind_param('i', $id);
+            $stmt->bind_param('s', $id);
             $stmt->execute();
             $result = $stmt->get_result()->fetch_assoc();
             $stmt->close();
@@ -44,7 +43,7 @@ class UserRepository {
 
             return $result;
         } catch (Exception $e) {
-            Flight::halt(400, json_encode(['status' => 'error', 'message' => $e->getMessage()]));
+            Flight::error($e);
         }
     }
 
@@ -54,18 +53,18 @@ class UserRepository {
             FROM user 
             WHERE id = ? 
             AND is_active = 1");
-            $stmt->bind_param('i', $id);
+            $stmt->bind_param('s', $id);
             $stmt->execute();
             $result = $stmt->get_result()->fetch_assoc();
             $stmt->close();
             Flight::db()->close();
 
             if (is_null($result))
-                throw new Exception('The user is not exist');
+                throw new Exception('The user not exist');
 
             return $result;
         } catch (Exception $e) {
-            Flight::halt(400, json_encode(['status' => 'error', 'message' => $e->getMessage()]));
+            Flight::error($e);
         }
     }
 
@@ -84,17 +83,18 @@ class UserRepository {
             if (is_null($result) && !is_null($email)) 
                 throw new Exception('Wrong password or email');
             else if (is_null($result) && !is_null($id))
-                throw new Exception('Wrong password');
+                throw new Exception('The user is not active');
 
             return $result;
         } catch (Exception $e) {
-            Flight::halt(400, json_encode(['status' => 'error', 'message' => $e->getMessage()]));
+            Flight::error($e);
         }
     }
 
     public static function verifyUser($email, $is_active) {
         try {
-            $stmt = Flight::db()->prepare("SELECT id, verification_code FROM user 
+            $stmt = Flight::db()->prepare("SELECT id, verification_code 
+            FROM user 
             WHERE email = ? 
             AND is_active = ?");
             $stmt->bind_param('si', $email, $is_active);
@@ -108,7 +108,7 @@ class UserRepository {
 
             return (is_null($result)) ? null : $result['id'];
         } catch (Exception $e) {
-            Flight::halt(400, json_encode(['status' => 'error', 'message' => $e->getMessage()]));
+            Flight::error($e);
         }
     }
 
@@ -125,9 +125,13 @@ class UserRepository {
             $last_reset_request = date('Y-m-d H:i:s', time());
             $verification_code = $data->verification_code;
             
-            $stmt = Flight::db()->prepare("INSERT INTO user (id, name, father_last_name, mother_last_name, password, birthday, phone_number, email, user_type, last_reset_request, verification_code)
+            $stmt = Flight::db()->prepare("INSERT INTO user (id, name, father_last_name, 
+            mother_last_name, password, birthday, phone_number, email, user_type, 
+            last_reset_request, verification_code)
             VALUES (?,?,?,?,?,?,?,?,?,?,?);");
-            $stmt->bind_param('sssssssssss', $id, $name, $father_last_name, $mother_last_name, $password, $birthday, $phone_number, $email, $user_type, $last_reset_request, $verification_code);
+            $stmt->bind_param('sssssssssss', $id, $name, $father_last_name, 
+            $mother_last_name, $password, $birthday, $phone_number, $email, $user_type, 
+            $last_reset_request, $verification_code);
             $stmt->execute();
 
             if ($user_type == 'ADMIN') {
@@ -135,10 +139,7 @@ class UserRepository {
                 Flight::db()->close();
             }
         } catch (Exception $e) {
-            if (str_starts_with($e->getMessage(), 'Duplicate'))
-                Flight::halt(400, json_encode(['status' => 'warning', 'message' => 'The email is already registered']));
-            else
-                Flight::halt(400, json_encode(['status' => 'error', 'message' => $e->getMessage()]));
+            Flight::error($e);
         }
     }
 
@@ -160,20 +161,22 @@ class UserRepository {
 
             return $result['id'];
         } catch (Exception $e) {
-            Flight::halt(400, json_encode(['status' => 'error', 'message' => $e->getMessage()]));
+            Flight::error($e);
         } 
     }
 
     public static function getLastResetRequest($email) {
         try {
-            $stmt = Flight::db()->prepare("SELECT last_reset_request FROM user WHERE email = ?");
+            $stmt = Flight::db()->prepare("SELECT last_reset_request 
+            FROM user 
+            WHERE email = ?");
             $stmt->bind_param('s', $email);
             $stmt->execute();
             $result = $stmt->get_result()->fetch_assoc();
 
             return $result['last_reset_request'];
         } catch (Exception $e) {
-            Flight::halt(400, json_encode(['status' => 'error', 'message' => $e->getMessage()]));
+            Flight::error($e);
         }
     }
 
@@ -181,10 +184,12 @@ class UserRepository {
         try {
             $token = bin2hex(random_bytes(16));
             $token_hash = hash('sha256', $token);
-            $expiry = date('Y-m-d H:i:s', time() + 1800);
+            $expiry = date('Y-m-d H:i:s', time() + 900);
             $reset_request = date('Y-m-d H:i:s', time());
 
-            $stmt = Flight::db()->prepare("UPDATE user SET reset_token_hash = ?, reset_token_expires_at = ?, last_reset_request = ? WHERE email = ?");
+            $stmt = Flight::db()->prepare("UPDATE user SET reset_token_hash = ?, 
+            reset_token_expires_at = ?, last_reset_request = ? 
+            WHERE email = ?");
             $stmt->bind_param('ssss', $token_hash, $expiry, $reset_request, $email);
             $stmt->execute();
             $stmt->close();
@@ -192,20 +197,22 @@ class UserRepository {
 
             return $token;
         } catch (Exception $e) {
-            Flight::halt(400, json_encode(['status' => 'error', 'message' => $e->getMessage()]));
+            Flight::error($e);
         }
     }
 
-    public static function getResetInfor($token) {
+    public static function getResetInfo($token) {
         try {
-            $stmt = Flight::db()->prepare("SELECT id, reset_token_expires_at FROM user WHERE reset_token_hash = ?");
+            $stmt = Flight::db()->prepare("SELECT id, reset_token_expires_at 
+            FROM user 
+            WHERE reset_token_hash = ?");
             $stmt->bind_param('s', $token);
             $stmt->execute();
             $result = $stmt->get_result()->fetch_assoc();
 
             return $result;
         } catch (Exception $e) {
-            Flight::halt(400, json_encode(['status' => 'error', 'message' => $e->getMessage()]));
+            Flight::error($e);
         }
     }
 
@@ -219,35 +226,37 @@ class UserRepository {
             $phone_number = $data->phone_number;
             $email = $data->email;
 
-            $stmt = Flight::db()->prepare("UPDATE user SET name = ?, father_last_name = ?, mother_last_name = ?, birthday = ?, phone_number = ?, email = ?
+            $stmt = Flight::db()->prepare("UPDATE user SET name = ?, father_last_name = ?, 
+            mother_last_name = ?, birthday = ?, phone_number = ?, email = ?
             WHERE id = ?");
-            $stmt->bind_param('sssssss', $name, $father_last_name, $mother_last_name, $birthday, $phone_number, $email, $id);
+            $stmt->bind_param('sssssss', $name, $father_last_name, 
+            $mother_last_name, $birthday, $phone_number, $email, $id);
             $stmt->execute();
             $stmt->close();
             Flight::db()->close();
         } catch (Exception $e) {
-            if (str_starts_with($e->getMessage(), 'Duplicate'))
-                Flight::halt(400, json_encode(['status' => 'warning', 'message' => 'The email is already registered']));
-            else
-                Flight::halt(400, json_encode(['status' => 'error', 'message' => $e->getMessage()]));
+            Flight::error($e);
         }
     }
 
     public static function updateResetPassword($password, $id) {
         try {
-            $stmt = Flight::db()->prepare("UPDATE user SET password = ?, reset_token_hash = NULL, reset_token_expires_at = NULL WHERE id = ?");
+            $stmt = Flight::db()->prepare("UPDATE user 
+            SET password = ?, reset_token_hash = NULL, reset_token_expires_at = NULL 
+            WHERE id = ?");
             $stmt->bind_param('ss', $password, $id);
             $stmt->execute();
             $stmt->close();
             Flight::db()->close();
         } catch (Exception $e) {
-            Flight::halt(400, json_encode(['status' => 'error', 'message' => $e->getMessage()]));
+            Flight::error($e);
         }
     }
 
     public static function deActivate($id, $state, $code = null) {
         try {
-            $stmt = Flight::db()->prepare("UPDATE user SET is_active = ?, verification_code = ? 
+            $stmt = Flight::db()->prepare("UPDATE user 
+            SET is_active = ?, verification_code = ? 
             WHERE id = ?");
             $stmt->bind_param('iss', $state, $code, $id);
             $stmt->execute();
@@ -256,19 +265,20 @@ class UserRepository {
                 Flight::db()->close();
             }
         } catch (Exception $e) {
-            if (str_starts_with($e->getMessage(), 'The user'))
-                Flight::halt(400, json_encode(['status' => 'error', 'message' => $e->getMessage()]));
+            Flight::error($e);
         }
     }
 
     public static function eliminate($id) {
         try {
-            $stmt = Flight::db()->prepare("DELETE FROM user WHERE id = ? 
-            AND is_active = 0 AND verification_code != ?");
+            $stmt = Flight::db()->prepare("DELETE FROM user 
+            WHERE id = ? 
+            AND is_active = 0 
+            AND verification_code != ?");
             $stmt->bind_param('ss', $id, $_ENV['BAN_USER']);
             $stmt->execute();
         } catch (Exception $e) {
-            Flight::halt(400, json_encode(['status' => 'error', 'message' => $e->getMessage()]));
+            Flight::error($e);
         }
     }
 }

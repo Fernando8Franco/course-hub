@@ -12,6 +12,19 @@ $dotenv->load();
 Flight::register('db', mysqli::class, [$_ENV['DB_HOST'], $_ENV['DB_USER'], $_ENV['DB_PASSWORD'], $_ENV['DB_NAME'], intval($_ENV['DB_PORT'])]);
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
+Flight::map('error', function(Exception $e){
+    if (str_starts_with($e->getMessage(), 'Duplicate'))
+        Flight::halt(400, json_encode(['status' => 'warning', 'message' => 'The email is already registered']));
+    else
+        Flight::halt(400, json_encode(['status' => 'error', 'message' => $e->getMessage()]));
+
+});
+
+Flight::map('notFound', function(){
+    Flight::response()->status(404);
+    Flight::halt(404, json_encode(['status' => 'error', 'message' => 'The route not exist']));
+});
+
 $user = new Services\UserService;
 $school = new Services\SchoolService;
 $course = new Services\CourseService;

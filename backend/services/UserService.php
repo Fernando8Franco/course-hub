@@ -6,12 +6,16 @@ require_once 'TokenService.php';
 use flight;
 use Exception;
 use Repository\UserRepository;
+use Throwable;
+use DateTime;
 
 class UserService {
     function getAllByUserType($user_type) {
         $token_data = tokenData();
 
         validateAdmin($token_data->user_type);
+
+        $this->validateUserType($user_type);
       
         $result = UserRepository::getAllByUserType($user_type);
 
@@ -37,22 +41,34 @@ class UserService {
     }
 
     function auth() {
-        $data = Flight::request()->data;
-        $email = $data->email ?? '';
-        $password = $data->password ?? '';
+        try {
+            $data = Flight::request()->data;
+            $email = $data->email;
+            $password = $data->password;
+
+            $this->isValidEmail($email);
+        } catch (Exception $e) {
+            Flight::error($e);
+        }
         
-        $result = UserRepository::getAuthInfo($email);
-    
-        if (!password_verify($password, $result['password'])) 
-            Flight::halt(400, json_encode(['status' => 'error', 'message' => 'Wrong password or email']));
-        
-        $token = encodeToken($result['id'], $result['user_type']);
+        $token = $this->getToken($email, $password);
     
         Flight::halt(200, json_encode(['token' => $token]));
     }
 
     function create($user_type) {
-        $data = Flight::request()->data;
+        try {
+            $data = Flight::request()->data;
+
+            if ($data->count() > 7)
+                throw new Exception('To many information');
+            
+            $this->validateData($data, ['verification_code', 'token', 'id', 'new_password']);
+        } catch (Exception $e) {
+            Flight::error($e);
+        }
+
+        $this->validateUserType($user_type);
 
         if ($user_type == 'admin') {
             $token_data = tokenData();
@@ -62,16 +78,17 @@ class UserService {
             Flight::halt(200, json_encode(['status' => 'success', 'message' => 'User stored correctly']));
         }
 
-        $data->verification_code = generateVerificationCode();
+        $data->verification_code = $this->generateVerificationCode();
         $id = UserRepository::verifyUser($data->email, 0);
 
         if (!is_null($id)) {
             $result = UserRepository::getLastResetRequest($data->email);
-            validateRequestTime($result);
+            $this->validateRequestTime($result);
             UserRepository::eliminate($id);
         }
 
         UserRepository::save($user_type, $data);
+
         $body = EmailService::verifyEmail($data->verification_code);
         MailerService::sendEmail($data->email, 'Codigo de verificación', $body);
 
@@ -79,7 +96,13 @@ class UserService {
     }
 
     function validateVerificationCode() {
-        $data = Flight::request()->data;
+        try {
+            $data = Flight::request()->data;
+            $this->validateData($data, ['name', 'father_last_name', 'mother_last_name', 
+            'birthday', 'phone_number', 'token', 'id', 'new_password']);
+        } catch (Exception $e) {
+            Flight::error($e);
+        }
 
         $id = UserRepository::verifyCode($data->email, $data->verification_code);
 
@@ -96,8 +119,13 @@ class UserService {
     }
 
     function sendResetPasswordEmail() {
-        $data = Flight::request()->data;
-        $email = $data->email;
+        try {
+            $data = Flight::request()->data;
+            $email = $data->email;
+            $this->isValidEmail($email);
+        } catch (Exception $e) {
+            Flight::error($e);
+        }
 
         if (is_null(UserRepository::verifyUser($email, 1))) {
             usleep(2500000 + rand(100000, 699999));
@@ -105,7 +133,7 @@ class UserService {
         }
 
         $result = UserRepository::getLastResetRequest($email);
-        validateRequestTime($result);
+        $this->validateRequestTime($result);
     
         $token = UserRepository::updateResetToken($email);
     
@@ -116,11 +144,17 @@ class UserService {
     }
 
     function resetPassword() {
-        $data = Flight::request()->data;
-        $token =  hash('sha256', $data->token);
-        $password = $data->password;
+        try {
+            $data = Flight::request()->data;
+            $this->validateData($data, ['name', 'father_last_name', 'mother_last_name', 
+            'birthday', 'phone_number', 'email', 'verification_code', 'id', 'new_password']);
+            $token =  hash('sha256', $data->token);
+            $password = $data->password;
+        } catch (Exception $e) {
+            Flight::error($e);
+        }
         
-        $result = UserRepository::getResetInfor($token);
+        $result = UserRepository::getResetInfo($token);
         
         if (is_null($result) || strtotime($result['reset_token_expires_at']) <= time())
             Flight::halt(400, json_encode(['status' => 'error', 'message' => 'Token expired']));
@@ -133,10 +167,17 @@ class UserService {
 
     function update() {
         $token_data = tokenData();
-        $data = Flight::request()->data;
 
-        if ($token_data->user_type === 'CUSTOMER') 
-            $data->id = $token_data->user_id;
+        try {
+            $data = Flight::request()->data;
+
+            if ($token_data->user_type === 'CUSTOMER')
+                $data->id = $token_data->user_id;
+
+            $this->validateData($data, ['password','verification_code', 'token', 'new_password']);
+        } catch (Exception $e) {
+            Flight::error($e);
+        }  
             
         UserRepository::update($data);
 
@@ -146,9 +187,15 @@ class UserService {
     function updatePassword() {
         $token_data = tokenData();
 
-        $data = Flight::request()->data;
-        $old_password = $data->old_password;
-        $new_password = $data->new_password;
+        try {
+            $data = Flight::request()->data;
+            $this->validateData($data, ['name', 'father_last_name', 'mother_last_name', 
+            'birthday', 'phone_number', 'email', 'verification_code', 'token','id']);
+            $old_password = $data->password;
+            $new_password = $data->new_password;
+        } catch (Exception $e) {
+            Flight::error($e);
+        } 
 
         $result = UserRepository::getAuthInfo(null, $token_data->user_id);
 
@@ -177,6 +224,92 @@ class UserService {
             
         Flight::halt(200, json_encode(['status' => 'success', 'message' => 'User deactivated correctly']));    
     }
+
+
+    // PRIVATE FUNCTIONS
+
+    private function getToken($email, $password) {
+        $result = UserRepository::getAuthInfo($email);
+    
+        if (!password_verify($password, $result['password'])) 
+            Flight::halt(400, json_encode(['status' => 'error', 'message' => 'Wrong password or email']));
+        
+        $token = encodeToken($result['id'], $result['user_type']);
+
+        return $token;
+    }
+
+    private function validateUserType($user_type) {
+        if ($user_type != 'admin' && $user_type != 'customer')
+                Flight::halt(400, json_encode(['status' => 'error', 'message' => "The user type: {$user_type} does not exist"]));
+    }
+
+    private function generateVerificationCode() {
+        $characters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $verificationCode = '';
+        for ($i = 0; $i < 6; $i++) {
+            $verificationCode .= $characters[rand(0, strlen($characters) - 1)];
+        }
+        return ($verificationCode != $_ENV['BAN_USER']) ? $verificationCode : $this->generateVerificationCode();
+    }
+
+    private function validateData($data, $skip_value = []) {
+        $rules = [
+            'name' => ['max_length' => 80, 'error' => 'Not valid name'],
+            'father_last_name' => ['max_length' => 80, 'error' => 'Not valid father last name'],
+            'mother_last_name' => ['max_length' => 80, 'error' => 'Not valid mother last name'],
+            'password' => ['max_length' => 50, 'error' => 'Not valid password'],
+            'birthday' => ['date_format' => 'Y-m-d', 'error' => 'Not valid birthday'],
+            'phone_number' => ['max_length' => 15, 'is_numeric' => true,'error' => 'Not valid phone number'],
+            'email' => ['max_length' => 60, 'email' => true, 'error' => 'Not valid email'],
+            'verification_code' => ['max_length' => 6, 'error' => 'Not valid verification code'],
+            'token' => ['Not valid token'],
+            'id' => ['Not valid id'],
+            'new_password' => ['max_length' => 50, 'error' => 'Not valid password']
+        ];
+    
+        foreach ($rules as $field => $rule) {
+            $value = $data->{$field} ?? null;
+            if (!empty($skip_value) && in_array($field, $skip_value))
+                continue;
+
+            if (empty($value))
+                throw new Exception("The field {$field} can not be empty");
+
+            if (isset($rule['max_length']) && strlen($value) > $rule['max_length'])
+                throw new Exception("The field {$field} only can have {$rule['max_length']} characters");
+
+            if (isset($rule['date_format']) && !$this->isValidDate($value, $rule['date_format']))
+                throw new Exception($rule['error']);
+
+            if (isset($rule['is_numeric']) && $rule['is_numeric'] && !ctype_digit($value))
+                throw new Exception($rule['error']);
+
+            if (isset($rule['email']) && !filter_var($value, FILTER_VALIDATE_EMAIL))
+                throw new Exception($rule['error']);
+        }
+    }
+    
+    private function isValidDate($date, $format = 'Y-m-d') {
+        $dateTime = DateTime::createFromFormat($format, $date);
+        return $dateTime && $dateTime->format($format) === $date;
+    }    
+
+    private function isValidEmail($email) {
+        if(empty($email) || (strlen($email) > 60 || !filter_var($email, FILTER_VALIDATE_EMAIL)))
+            throw new Exception('Not valid email');
+    }
+
+    private function validateRequestTime($time) {
+        $last_reset_time = strtotime($time);
+        $current_time = time();
+        $time_difference = $current_time - $last_reset_time;
+    
+        if ($time_difference < 600) {
+            $wait_time = 600 - $time_difference;
+            Flight::halt(400, json_encode(['status' => 'warning', 'message' => $wait_time]));
+        }
+    }
 }
 
 function validateAdmin($user_type) {
@@ -187,24 +320,4 @@ function validateAdmin($user_type) {
 function validateCustomer($user_type) {
     if ($user_type != 'CUSTOMER')
             Flight::halt(403, json_encode(['status' => 'error', 'message' => 'Unauthorized request']));
-}
-
-function generateVerificationCode() {
-    $characters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    $verificationCode = '';
-    for ($i = 0; $i < 6; $i++) {
-        $verificationCode .= $characters[rand(0, strlen($characters) - 1)];
-    }
-    return ($verificationCode != $_ENV['BAN_USER']) ? $verificationCode : generateVerificationCode();
-}
-
-function validateRequestTime($time) {
-    $last_reset_time = strtotime($time);
-    $current_time = time();
-    $time_difference = $current_time - $last_reset_time;
-
-    if ($time_difference < 600) {
-        $wait_time = 600 - $time_difference;
-        Flight::halt(400, json_encode(['status' => 'warning', 'message' => $wait_time]));
-    }
 }

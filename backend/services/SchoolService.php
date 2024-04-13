@@ -15,7 +15,7 @@ class SchoolService {
 
         $result = SchoolRepository::getAll();
 
-        Flight::json($result, 200);
+        Flight::halt(200, json_encode($result));
     }
 
     function getOne($id) {
@@ -25,7 +25,7 @@ class SchoolService {
         
         $result = SchoolRepository::getOne($id);    
 
-        Flight::json($result, 200);
+        Flight::halt(200, json_encode($result));
     }
 
     function create() {
@@ -37,7 +37,7 @@ class SchoolService {
 
         SchoolRepository::save($data);
     
-        Flight::json(array('status' => 'success', 'message' => 'School stored correctly'), 200);
+        Flight::halt(200, json_encode(['status' => 'success', 'message' => 'School stored correctly']));
     }
 
     function update() {
@@ -49,7 +49,7 @@ class SchoolService {
 
         SchoolRepository::update($data);
     
-        Flight::json(array('status' => 'success', 'message' => 'School updated correctly'), 200);
+        Flight::halt(200, json_encode(['status' => 'success', 'message' => 'School updated correctly']));
     }
 
     function delete($id) {
@@ -59,7 +59,7 @@ class SchoolService {
 
         SchoolRepository::eliminate($id);
     
-        Flight::json(array('status' => 'success', 'message' => 'School deleted correctly'), 200);
+        Flight::halt(200, json_encode(['status' => 'success', 'message' => 'School deleted correctly']));
     }
 }
 
