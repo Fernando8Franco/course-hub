@@ -10,7 +10,8 @@ class UserRepository {
     public static function getAllByUserType($user_type) {
         try {
             $stmt = Flight::db()->prepare("SELECT id, name, father_last_name, 
-            mother_last_name, birthday, phone_number, email, user_type, is_active, verification_code
+            mother_last_name, birthday, phone_number, email, user_type, 
+            is_active, verification_code
             FROM user 
             WHERE user_type = ?
             ORDER BY is_active DESC, verification_code DESC, name ASC");
@@ -39,7 +40,7 @@ class UserRepository {
             Flight::db()->close();
 
             if (is_null($result))
-                throw new Exception("The user with id: {$id} dont exist");
+                throw new Exception("The user with id: {$id} does not exist");
 
             return $result;
         } catch (Exception $e) {
@@ -49,7 +50,8 @@ class UserRepository {
 
     public static function getOneByToken($id) {
         try {
-            $stmt = Flight::db()->prepare("SELECT id, name, father_last_name, mother_last_name, phone_number, email 
+            $stmt = Flight::db()->prepare("SELECT id, name, father_last_name, 
+            mother_last_name, phone_number, email 
             FROM user 
             WHERE id = ? 
             AND is_active = 1");
@@ -71,10 +73,15 @@ class UserRepository {
     public static function getAuthInfo($email = null, $id = null) {
         try {
             if (!is_null($email)) {
-                $stmt = Flight::db()->prepare("SELECT password, id, user_type FROM user WHERE email = ? AND is_active = 1;");
+                $stmt = Flight::db()->prepare("SELECT password, id, user_type 
+                FROM user 
+                WHERE email = ? 
+                AND is_active = 1;");
                 $stmt->bind_param('s', $email);
             } else {
-                $stmt = Flight::db()->prepare("SELECT password FROM user WHERE id = ? AND is_active = 1;");
+                $stmt = Flight::db()->prepare("SELECT password FROM user 
+                WHERE id = ? 
+                AND is_active = 1;");
                 $stmt->bind_param('s', $id);
             }
             $stmt->execute();

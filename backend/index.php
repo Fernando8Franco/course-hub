@@ -13,8 +13,10 @@ Flight::register('db', mysqli::class, [$_ENV['DB_HOST'], $_ENV['DB_USER'], $_ENV
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
 Flight::map('error', function(Exception $e){
-    if (str_starts_with($e->getMessage(), 'Duplicate'))
+    if (str_starts_with($e->getMessage(), 'Duplicate') && str_ends_with($e->getMessage(), "'user.email'"))
         Flight::halt(400, json_encode(['status' => 'warning', 'message' => 'The email is already registered']));
+    else if (str_starts_with($e->getMessage(), 'Duplicate') && str_ends_with($e->getMessage(), "'school.name'"))
+        Flight::halt(400, json_encode(['status' => 'warning', 'message' => 'The school is already registered']));
     else
         Flight::halt(400, json_encode(['status' => 'error', 'message' => $e->getMessage()]));
 
@@ -58,8 +60,10 @@ Flight::route('GET /school/@id', [$school, 'getOne']);
 Flight::route('POST /school', [$school, 'create']);
 
 Flight::route('PUT /school', [$school, 'update']);
+Flight::route('PUT /school/@id/@state', [$school, 'deActivate']);
 
-Flight::route('DELETE /school/@id', [$school, 'delete']);
+// TO DO
+//Flight::route('DELETE /school/@id', [$school, 'delete']);
 
 // COURSE ROUTES
 Flight::route('GET /courses', [$course, 'getAll']);

@@ -33,7 +33,15 @@ class SchoolService {
 
         validateAdmin($token_data->user_type);
 
-        $data = Flight::request()->data;
+        try {
+            $data = Flight::request()->data;
+            if (empty($data->name))
+                throw new Exception('The field name can not be empty');
+            if (strlen($data->name) > 150)
+                throw new Exception('The field name only can have 150 characters');
+        } catch (Exception $e) {
+            Flight::error($e);
+        }
 
         SchoolRepository::save($data);
     
@@ -45,11 +53,41 @@ class SchoolService {
 
         validateAdmin($token_data->user_type);
 
-        $data = Flight::request()->data;
+        try {
+            $data = Flight::request()->data;
+            if (empty($data->id))
+                throw new Exception('The field id can not be empty');
+            if (!ctype_digit($data->id))
+                throw new Exception('Not valid id');
+            if (empty($data->name))
+                throw new Exception('The field name can not be empty');
+            if (strlen($data->name) > 150)
+                throw new Exception('The field name only can have 150 characters');
+        } catch (Exception $e) {
+            Flight::error($e);
+        }
 
         SchoolRepository::update($data);
     
         Flight::halt(200, json_encode(['status' => 'success', 'message' => 'School updated correctly']));
+    }
+
+    function deActivate($id, $state) {
+        $token_data = tokenData();
+
+        if (!ctype_digit($id))
+                throw new Exception('Not valid id');
+        if ($state !== '0' && $state !== '1')
+            Flight::halt(400, json_encode(['status' => 'error', 'message' => 'State not valid']));
+
+        validateAdmin($token_data->user_type);
+        
+        SchoolRepository::deActivate($id, $state);
+    
+        if ($state)
+            Flight::halt(200, json_encode(['status' => 'success', 'message' => 'School activated correctly']));
+            
+        Flight::halt(200, json_encode(['status' => 'success', 'message' => 'School deactivated correctly']));    
     }
 
     function delete($id) {

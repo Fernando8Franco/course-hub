@@ -6,7 +6,6 @@ require_once 'TokenService.php';
 use flight;
 use Exception;
 use Repository\UserRepository;
-use Throwable;
 use DateTime;
 
 class UserService {
@@ -314,10 +313,10 @@ class UserService {
 
 function validateAdmin($user_type) {
     if ($user_type != 'ADMIN')
-            Flight::halt(403, json_encode(['status' => 'error', 'message' => 'Unauthorized request']));
+        Flight::halt(403, json_encode(['status' => 'error', 'message' => 'Unauthorized request']));
 }
 
 function validateCustomer($user_type) {
     if ($user_type != 'CUSTOMER')
-            Flight::halt(403, json_encode(['status' => 'error', 'message' => 'Unauthorized request']));
+        Flight::halt(403, json_encode(['status' => 'error', 'message' => 'Unauthorized request']));
 }
