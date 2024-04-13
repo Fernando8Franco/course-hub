@@ -35,7 +35,8 @@ Flight::route('PUT /user', [$user, 'update']);
 Flight::route('PUT /update-password', [$user, 'updatePassword']);
 Flight::route('PUT /user/@id/@state', [$user, 'deBanUser']);
 
-Flight::route('DELETE /user/@id', [$user, 'delete']);
+// TO DO
+//Flight::route('DELETE /user/@id', [$user, 'delete']);
 
 // SCHOOL ROUTES
 Flight::route('GET /schools', [$school, 'getAll']);

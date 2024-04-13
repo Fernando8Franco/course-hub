@@ -76,7 +76,7 @@ class UserRepository {
                 $stmt->bind_param('s', $email);
             } else {
                 $stmt = Flight::db()->prepare("SELECT password FROM user WHERE id = ? AND is_active = 1;");
-                $stmt->bind_param('i', $id);
+                $stmt->bind_param('s', $id);
             }
             $stmt->execute();
             $result = $stmt->get_result()->fetch_assoc();
@@ -150,7 +150,7 @@ class UserRepository {
             AND verification_code = ?
             AND verification_code != ?
             AND is_active = 0");
-            $stmt->bind_param('sss', $email, $_ENV['BAN_USER'], $verification_code);
+            $stmt->bind_param('sss', $email, $verification_code, $_ENV['BAN_USER']);
             $stmt->execute();
             $result = $stmt->get_result()->fetch_assoc();
 
