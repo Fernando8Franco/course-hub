@@ -15,7 +15,7 @@ class TransactionService {
 
         $result = TransactionRepository::getAll();
 
-        Flight::json($result, 200);
+        Flight::halt(200, json_encode($result));
     }
 
     function getPendingTransactionsWithImage() {
@@ -25,7 +25,7 @@ class TransactionService {
 
         $result = TransactionRepository::getPendingTransactionsWithImage();
 
-        Flight::json($result, 200);
+        Flight::halt(200, json_encode($result));
     }
 
     function getTransactionsByState($state) {
@@ -35,7 +35,7 @@ class TransactionService {
 
         $result = TransactionRepository::getTransactionsByState($state);
 
-        Flight::json($result, 200);
+        Flight::halt(200, json_encode($result));
     }
 
     function getOne($id) {
@@ -45,7 +45,7 @@ class TransactionService {
         
         $result = TransactionRepository::getOne($id);    
 
-        Flight::json($result, 200);
+        Flight::halt(200, json_encode($result));
     }
 
     function getAllByToken() {
@@ -55,15 +55,26 @@ class TransactionService {
 
         $result = TransactionRepository::getAllByToken($token_data->user_id);
 
-        Flight::json($result, 200);
+        Flight::halt(200, json_encode($result));
     }
 
     function create() {
         $token_data = tokenData();
 
         validateCustomer($token_data->user_type);
-        
-        $data = Flight::request()->data;
+
+        try {
+            $data = Flight::request()->data;
+            $course_id = $data->course_id;
+
+            if (is_null($course_id))
+                throw new Exception('The field course_id can not be empty');
+            if (!ctype_digit($course_id))
+                throw new Exception('Not valid course id');
+
+        } catch (Exception $e) {
+            Flight::error($e);
+        }
 
         if (!TransactionRepository::courseIsActive($data->course_id))
             Flight::halt(400, json_encode(['status' => 'warning', 'message' => 'The course is not available']));
@@ -73,9 +84,30 @@ class TransactionService {
         if ($week_transactions >= 7)
             Flight::halt(400, json_encode(['status' => 'warning', 'message' => 'Transaction limit has been reached']));
 
-        TransactionRepository::save($token_data->user_id, $data);
+        TransactionRepository::save($token_data->user_id, $course_id);
 
-        Flight::json(array('status' => 'success', 'message' => 'Transaction stored correctly'), 200);
+        Flight::halt(200, json_encode(['status' => 'success', 'message' => 'Transaction stored correctly']));
+    }
+
+    function uploadImage() {
+        $token_data = tokenData();
+
+        validateCustomer($token_data->user_type);
+
+        try {
+            $transaction_id = Flight::request()->data->transaction_id;
+            $image = Flight::request()->files->image;
+
+            if (is_null($transaction_id))
+                throw new Exception('The field transaction_id can not be empty');
+            $this->validateImage( $image);
+        } catch (Exception $e) {
+            Flight::error($e);
+        }
+
+        TransactionRepository::uploadImage($transaction_id, $image, $token_data->user_id);
+    
+        Flight::halt(200, json_encode(['status' => 'success', 'message' => 'Transaction image updated correctly']));
     }
 
     function update($id, $state) {
@@ -85,7 +117,7 @@ class TransactionService {
 
         TransactionRepository::update($id, $state);
     
-        Flight::json(array('status' => 'success', 'message' => 'Transaction updated correctly'), 200);
+        Flight::halt(200, json_encode(['status' => 'success', 'message' => 'Transaction updated correctly']));
     }
 
     function delete($id) {
@@ -95,6 +127,20 @@ class TransactionService {
 
         TransactionRepository::eliminate($id);
     
-        Flight::json(array('status' => 'success', 'message' => 'Transaction deleted correctly'), 200);
+        Flight::halt(200, json_encode(['status' => 'success', 'message' => 'Transaction deleted correctly']));
+    }
+
+    private function validateImage($image) {
+        if (empty($image))
+            throw new Exception('The field image can not be empty');
+
+        if ($image['size'] > 300000)
+            throw new Exception('The image can not size more than 500KB');
+
+        $fileType = strtolower(pathinfo($image['full_path'],PATHINFO_EXTENSION));
+        if ($fileType != "jpg" && $fileType != "png" && $fileType != "jpeg")
+            throw new Exception('File type not accepted only JPG, JPEG or PNG');
+
+        return $fileType;
     }
 }

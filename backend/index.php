@@ -81,6 +81,7 @@ Flight::route('GET /transaction/@id', [$transaction, 'getOne']);
 Flight::route('GET /transactions-customer', [$transaction, 'getAllByToken']);
 
 Flight::route('POST /transaction', [$transaction, 'create']);
+Flight::route('POST /transaction-image', [$transaction, 'uploadImage']);
 
 Flight::route('PUT /transaction/@id/@state', [$transaction, 'update']);
 
