@@ -272,19 +272,23 @@ class TransactionRepository {
     }
     
     public static function eliminate($id) {
+        Flight::db()->begin_transaction();
         try {
             $stmt = Flight::db()->prepare("DELETE FROM transaction WHERE id = ?;");
             $stmt->bind_param('s', $id);
             $stmt->execute();
             $rows = $stmt->affected_rows;
-            $stmt->close();
-            Flight::db()->close();
 
             if ($rows == 0)
-                throw new Exception("The user with id: {$id} dont exist");
-
+                throw new Exception("The course with id: {$id} does not exist");
+            
+            Flight::db()->commit();
         } catch (Exception $e) {
+            Flight::db()->rollback();
             Flight::error($e);
         }
+    
+        $stmt->close();
+        Flight::db()->close();
     }
 }

@@ -10,9 +10,33 @@ class CourseRepository {
     public static function getAll() {
         try {
             $stmt = Flight::db()->prepare("SELECT c.id, c.name, c.description, c.price, 
-            c.instructor, c.modality, c.image, s.name 
+            c.instructor, c.modality, c.image, s.name school_name
             FROM course c 
             JOIN school s ON c.school_id = s.id 
+            AND c.is_active = 1
+            ORDER BY c.is_active DESC, c.name ASC;");
+            $stmt->execute();
+            $result = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+            $stmt->close();
+            Flight::db()->close();
+
+            return $result;
+        } catch (Exception $e) {
+            Flight::error($e);
+        }
+    }
+
+    public static function getAllByAdmin() {
+        try {
+            $stmt = Flight::db()->prepare("SELECT c.id, c.name, c.description, c.price, 
+            c.instructor, c.modality, c.image, s.name school_name, c.is_active,
+            COUNT(t.id) AS transaction_count_pending,
+            SUM(CASE WHEN t.transaction_state = 'COMPLETED' THEN 1 ELSE 0 END) AS transaction_count_completed,
+            SUM(CASE WHEN t.transaction_state = 'CANCELED' THEN 1 ELSE 0 END) AS transaction_count_canceled
+            FROM course c 
+            JOIN school s ON c.school_id = s.id
+            JOIN transaction t ON c.id = t.course_id
+            GROUP BY c.id, c.name
             ORDER BY c.is_active DESC, c.name ASC;");
             $stmt->execute();
             $result = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
@@ -28,7 +52,7 @@ class CourseRepository {
     public static function getOne($id) {
         try {
             $stmt = Flight::db()->prepare("SELECT c.id, c.name, c.description, c.price, 
-            c.instructor, c.modality, c.image, s.name 
+            c.instructor, c.modality, c.image, s.name school_name
             FROM course c 
             JOIN school s ON c.school_id = s.id
             AND c.id = ?;");
@@ -117,20 +141,40 @@ class CourseRepository {
         }
     }
 
-    public static function eliminate($id) {
+    public static function deActivate($id, $state) {
         try {
+            $stmt = Flight::db()->prepare("UPDATE course  SET is_active = ? WHERE id = ?");
+            $stmt->bind_param('ii', $state, $id);
+            $stmt->execute();
+            $stmt->close();
+            Flight::db()->close();
+        } catch (Exception $e) {
+            Flight::error($e);
+        }
+    }
+
+    public static function eliminate($id) {
+        Flight::db()->begin_transaction();
+        try {
+            $stmt = Flight::db()->prepare("DELETE FROM transaction WHERE course_id = ?;");
+            $stmt->bind_param('i', $id);
+            $stmt->execute();
+
             $stmt = Flight::db()->prepare("DELETE FROM course WHERE id = ?;");
             $stmt->bind_param('i', $id);
             $stmt->execute();
             $rows = $stmt->affected_rows;
-            $stmt->close();
-            Flight::db()->close();
 
             if ($rows == 0)
-                throw new Exception("The user with id: {$id} dont exist");
-
+                throw new Exception("The course with id: {$id} does not exist");
+            
+            Flight::db()->commit();
         } catch (Exception $e) {
+            Flight::db()->rollback();
             Flight::error($e);
         }
+    
+        $stmt->close();
+        Flight::db()->close();
     }
 }

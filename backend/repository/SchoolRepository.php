@@ -81,19 +81,31 @@ class SchoolRepository {
     }
 
     public static function eliminate($id) {
+        Flight::db()->begin_transaction();
         try {
+            $stmt = Flight::db()->prepare("DELETE FROM transaction WHERE course_id = (SELECT id FROM course WHERE school_id = ?);");
+            $stmt->bind_param('i', $id);
+            $stmt->execute();
+
+            $stmt = Flight::db()->prepare("DELETE FROM course WHERE school_id = ?;");
+            $stmt->bind_param('i', $id);
+            $stmt->execute();
+
             $stmt = Flight::db()->prepare("DELETE FROM school WHERE id = ?;");
             $stmt->bind_param('i', $id);
             $stmt->execute();
             $rows = $stmt->affected_rows;
-            $stmt->close();
-            Flight::db()->close();
 
             if ($rows == 0)
-                throw new Exception("The user with id: {$id} dont exist");
-
+                throw new Exception("The school with id: {$id} does not exist");
+            
+            Flight::db()->commit();
         } catch (Exception $e) {
+            Flight::db()->rollback();
             Flight::error($e);
         }
+    
+        $stmt->close();
+        Flight::db()->close();
     }
 }

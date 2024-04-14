@@ -288,4 +288,38 @@ class UserRepository {
             Flight::error($e);
         }
     }
+
+    public static function eliminateHard($id) {
+        Flight::db()->begin_transaction();
+        try {
+            $stmt = Flight::db()->prepare("DELETE FROM transaction WHERE user_id = ?");
+            $stmt->bind_param('s', $id);
+            $stmt->execute();
+
+            $stmt = Flight::db()->prepare("DELETE FROM course WHERE id IN (SELECT course_id FROM transaction WHERE user_id = ?)");
+            $stmt->bind_param('s', $id);
+            $stmt->execute();
+
+            $stmt = Flight::db()->prepare("DELETE FROM school WHERE id IN (SELECT school_id FROM course WHERE id IN (SELECT course_id FROM transaction WHERE user_id = ?))");
+            $stmt->bind_param('s', $id);
+            $stmt->execute();
+
+            $stmt = Flight::db()->prepare("DELETE FROM user WHERE id = ?");
+            $stmt->bind_param('s', $id);
+            $stmt->execute();
+
+            $rows = $stmt->affected_rows;
+
+            if ($rows == 0)
+                throw new Exception("The user with id: {$id} does not exist");
+
+            Flight::db()->commit();
+        } catch (Exception $e) {
+            Flight::db()->rollback();
+            Flight::error($e);
+        }
+
+        $stmt->close();
+        Flight::db()->close();
+    }
 }

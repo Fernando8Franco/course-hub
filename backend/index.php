@@ -23,7 +23,7 @@ Flight::map('error', function(Exception $e){
 
 Flight::map('notFound', function(){
     Flight::response()->status(404);
-    Flight::halt(404, json_encode(['status' => 'error', 'message' => 'The route not exist']));
+    Flight::halt(404, json_encode(['status' => 'error', 'message' => 'The route does not exist']));
 });
 
 $user = new Services\UserService;
@@ -34,57 +34,54 @@ $transaction = new Services\TransactionService;
 // TEST ROUTE
 Flight::route('GET /', function(){echo 'it works';});
 
+//////////////////////
 // USER ROUTES
+//////////////////////
 Flight::route('GET /users/@user_type', [$user, 'getAllByUserType']);
 Flight::route('GET /user/@id', [$user, 'getOne']);
 Flight::route('GET /user', [$user, 'getOneByToken']);
-
 Flight::route('POST /auth', [$user, 'auth']);
 Flight::route('POST /user/@user_type', [$user, 'create']);
 Flight::route('POST /user-verify', [$user, 'validateVerificationCode']);
 Flight::route('POST /send-reset-password-email', [$user, 'sendResetPasswordEmail']);
 Flight::route('POST /reset-password', [$user, 'resetPassword']);
-
 Flight::route('PUT /user', [$user, 'update']);
 Flight::route('PUT /update-password', [$user, 'updatePassword']);
 Flight::route('PUT /user/@id/@state', [$user, 'deBanUser']);
+Flight::route('DELETE /user/@id', [$user, 'delete']);
 
-// TO DO
-//Flight::route('DELETE /user/@id', [$user, 'delete']);
-
+//////////////////////
 // SCHOOL ROUTES
+//////////////////////
 Flight::route('GET /schools', [$school, 'getAll']);
 Flight::route('GET /school/@id', [$school, 'getOne']);
-
 Flight::route('POST /school', [$school, 'create']);
-
 Flight::route('PUT /school', [$school, 'update']);
 Flight::route('PUT /school/@id/@state', [$school, 'deActivate']);
+Flight::route('DELETE /school/@id', [$school, 'delete']);
 
-// TO DO
-//Flight::route('DELETE /school/@id', [$school, 'delete']);
-
+//////////////////////
 // COURSE ROUTES
+//////////////////////
 Flight::route('GET /courses', [$course, 'getAll']);
+Flight::route('GET /courses-admin', [$course, 'getAllByAdmin']);
 Flight::route('GET /course/@id', [$course, 'getOne']);
-
 Flight::route('POST /course', [$course, 'create']);
 Flight::route('POST /course-update', [$course, 'update']);
-
+Flight::route('PUT /school/@id/@state', [$course, 'deActivate']);
 Flight::route('DELETE /course/@id', [$course, 'delete']);
 
+//////////////////////
 // TRANSACTION ROUTES
+//////////////////////
 Flight::route('GET /transactions', [$transaction, 'getAll']);
 Flight::route('GET /transactions-pending-with-image', [$transaction, 'getPendingTransactionsWithImage']);
 Flight::route('GET /transactions/@state', [$transaction, 'getTransactionsByState']);
 Flight::route('GET /transaction/@id', [$transaction, 'getOne']);
 Flight::route('GET /transactions-customer', [$transaction, 'getAllByToken']);
-
 Flight::route('POST /transaction', [$transaction, 'create']);
 Flight::route('POST /transaction-image', [$transaction, 'uploadImage']);
-
 Flight::route('PUT /transaction/@id/@state', [$transaction, 'update']);
-
 Flight::route('DELETE /transaction/@id', [$transaction, 'delete']);
 
 Flight::start();

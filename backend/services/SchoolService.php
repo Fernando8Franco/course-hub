@@ -74,13 +74,13 @@ class SchoolService {
 
     function deActivate($id, $state) {
         $token_data = tokenData();
+        validateAdmin($token_data->user_type);
 
         if (!ctype_digit($id))
                 throw new Exception('Not valid id');
         if ($state !== '0' && $state !== '1')
             Flight::halt(400, json_encode(['status' => 'error', 'message' => 'State not valid']));
 
-        validateAdmin($token_data->user_type);
         
         SchoolRepository::deActivate($id, $state);
     

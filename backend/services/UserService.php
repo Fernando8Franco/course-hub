@@ -224,6 +224,16 @@ class UserService {
         Flight::halt(200, json_encode(['status' => 'success', 'message' => 'User deactivated correctly']));    
     }
 
+    function delete($id) {
+        $token_data = tokenData();
+
+        validateAdmin($token_data->user_type);
+
+        UserRepository::eliminateHard($id);
+
+        Flight::halt(200, json_encode(['status' => 'success', 'message' => 'User deleted correctly']));
+    }
+
 
     // PRIVATE FUNCTIONS
 

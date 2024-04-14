@@ -14,6 +14,16 @@ class CourseService {
         Flight::halt(200, json_encode($result));
     }
 
+    function getAllByAdmin() {
+        $token_data = tokenData();
+
+        validateAdmin($token_data->user_type);
+        
+        $result = CourseRepository::getAllByAdmin();
+
+        Flight::halt(200, json_encode($result));
+    }
+
     function getOne($id) {
         $result = CourseRepository::getOne($id);
 
@@ -64,6 +74,23 @@ class CourseService {
         CourseRepository::update($data, $image);
     
         Flight::halt(200, json_encode(['status' => 'success', 'message' => 'Course updated correctly']));
+    }
+
+    function deActivate($id, $state) {
+        $token_data = tokenData();
+        validateAdmin($token_data->user_type);
+
+        if (!ctype_digit($id))
+                throw new Exception('Not valid id');
+        if ($state !== '0' && $state !== '1')
+            Flight::halt(400, json_encode(['status' => 'error', 'message' => 'State not valid']));
+        
+        CourseRepository::deActivate($id, $state);
+    
+        if ($state)
+            Flight::halt(200, json_encode(['status' => 'success', 'message' => 'Course activated correctly']));
+            
+        Flight::halt(200, json_encode(['status' => 'success', 'message' => 'Course deactivated correctly'])); 
     }
 
     function delete($id) {
