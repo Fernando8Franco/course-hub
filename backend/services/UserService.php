@@ -254,9 +254,9 @@ class UserService {
 
     private function validateData($data, $skip_value = []) {
         $rules = [
-            'name' => ['max_length' => 80, 'error' => 'Not valid name'],
-            'father_last_name' => ['max_length' => 80, 'error' => 'Not valid father last name'],
-            'mother_last_name' => ['max_length' => 80, 'error' => 'Not valid mother last name'],
+            'name' => ['max_length' => 40, 'error' => 'Not valid name'],
+            'father_last_name' => ['max_length' => 40, 'error' => 'Not valid father last name'],
+            'mother_last_name' => ['max_length' => 40, 'error' => 'Not valid mother last name'],
             'password' => ['max_length' => 50, 'error' => 'Not valid password'],
             'birthday' => ['date_format' => 'Y-m-d', 'error' => 'Not valid birthday'],
             'phone_number' => ['max_length' => 15, 'is_numeric' => true,'error' => 'Not valid phone number'],

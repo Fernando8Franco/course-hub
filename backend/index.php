@@ -19,7 +19,6 @@ Flight::map('error', function(Exception $e){
         Flight::halt(400, json_encode(['status' => 'warning', 'message' => 'The school is already registered']));
     else
         Flight::halt(400, json_encode(['status' => 'error', 'message' => $e->getMessage()]));
-
 });
 
 Flight::map('notFound', function(){
@@ -70,8 +69,7 @@ Flight::route('GET /courses', [$course, 'getAll']);
 Flight::route('GET /course/@id', [$course, 'getOne']);
 
 Flight::route('POST /course', [$course, 'create']);
-
-Flight::route('PUT /course', [$course, 'update']);
+Flight::route('POST /course-update', [$course, 'update']);
 
 Flight::route('DELETE /course/@id', [$course, 'delete']);
 

@@ -11,13 +11,13 @@ class CourseService {
     function getAll() {
         $result = CourseRepository::getAll();
 
-        Flight::json($result, 200);
+        Flight::halt(200, json_encode($result));
     }
 
     function getOne($id) {
         $result = CourseRepository::getOne($id);
 
-        Flight::json($result, 200);
+        Flight::halt(200, json_encode($result));
     }
 
     function create() {
@@ -25,11 +25,22 @@ class CourseService {
 
         validateAdmin($token_data->user_type);
 
-        $data = Flight::request()->data;
+        try {
+            $data = Flight::request()->data;
+            $image = Flight::request()->files->image;
+            
+            if ($data->count() > 6)
+                throw new Exception('To many information');
+        
+            $this->validateData($data, ['id']);
+            $this->validateImage($image);
+        } catch (Exception $e) {
+            Flight::error($e);
+        }
 
-        CourseRepository::save($data);
+        CourseRepository::save($data, $image);
     
-        Flight::json(array('status' => 'success', 'message' => 'School stored correctly'), 200);
+        Flight::halt(200, json_encode(['status' => 'success', 'message' => 'Course stored correctly']));
     }
 
     function update() {
@@ -37,11 +48,22 @@ class CourseService {
 
         validateAdmin($token_data->user_type);
 
-        $data = Flight::request()->data;
+        try {
+            $data = Flight::request()->data;
+            $image = Flight::request()->files->image;
+            
+            if ($data->count() > 7)
+                throw new Exception('To many information');
+        
+            $this->validateData($data);
+            $this->validateImage($image);
+        } catch (Exception $e) {
+            Flight::error($e);
+        }
 
-        CourseRepository::update($data);
+        CourseRepository::update($data, $image);
     
-        Flight::json(array('status' => 'success', 'message' => 'School updated correctly'), 200);
+        Flight::halt(200, json_encode(['status' => 'success', 'message' => 'Course updated correctly']));
     }
 
     function delete($id) {
@@ -51,6 +73,53 @@ class CourseService {
 
         CourseRepository::eliminate($id);
     
-        Flight::json(array('status' => 'success', 'message' => 'School updated correctly'), 200);
+        Flight::halt(200, json_encode(['status' => 'success', 'message' => 'Course deleted correctly']));
+    }
+
+    private function validateData($data, $skip_value = []) {
+        $rules = [
+            'name' => ['max_length' => 80, 'error' => 'Not valid course name'],
+            'description' => ['error' => 'Not valid description'],
+            'price' => ['is_float' => true, 'error' => 'Not valid price value'],
+            'instructor' => ['max_length' => 80, 'error' => 'Not valid instructor name'],
+            'modality' => ['enum' => ['REMOTE', 'ON-SITE', 'HYBRID'], 'error' => 'Not valid modality'],
+            'school_id' => ['is_numeric' => true, 'error' => 'Not valid school id'],
+            'id' => ['is_numeric' => true, 'error' => 'Not valid course id']
+        ];
+    
+        foreach ($rules as $field => $rule) {
+            $value = $data->{$field} ?? null;
+            if (!empty($skip_value) && in_array($field, $skip_value))
+                continue;
+
+            if (empty($value))
+                throw new Exception("The field {$field} can not be empty");
+
+            if (isset($rule['max_length']) && strlen($value) > $rule['max_length'])
+                throw new Exception("The field {$field} only can have {$rule['max_length']} characters");
+
+            if (isset($rule['enum']) && !in_array($value, $rule['enum']))
+                throw new Exception("The field {$field} only can be: " . implode(" / ", $rule['enum']));
+
+            if (isset($rule['is_numeric']) && !ctype_digit($value))
+                throw new Exception($rule['error']);
+
+            if (isset($rule['is_float']) && !filter_var($value, FILTER_VALIDATE_FLOAT))
+                throw new Exception($rule['error']);
+        }
+    }
+
+    private function validateImage($image) {
+        if (empty($image))
+            throw new Exception('The field image can not be empty');
+
+        if ($image['size'] > 500000)
+            throw new Exception('The image can not size more than 500KB');
+
+        $fileType = strtolower(pathinfo($image['full_path'],PATHINFO_EXTENSION));
+        if ($fileType != "jpg" && $fileType != "png" && $fileType != "jpeg")
+            throw new Exception('File type not accepted only JPG, JPEG or PNG');
+
+        return $fileType;
     }
 }
