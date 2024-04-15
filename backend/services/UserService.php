@@ -170,8 +170,11 @@ class UserService {
         try {
             $data = Flight::request()->data;
 
-            if ($token_data->user_type === 'CUSTOMER')
+            if ($token_data->user_type === 'CUSTOMER') {
+                if ($data->count() > 6)
+                    throw new Exception('To many information');
                 $data->id = $token_data->user_id;
+            }
 
             $this->validateData($data, ['password','verification_code', 'token', 'new_password']);
         } catch (Exception $e) {
