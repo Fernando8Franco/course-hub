@@ -130,7 +130,7 @@ class TransactionRepository {
             JOIN course c ON t.course_id = c.id
             AND u.is_active = 1
             AND u.id = ?
-            ORDER BY t.date_purchase DESC;");
+            ORDER BY c.is_active DESC, t.date_purchase DESC;");
             $stmt->bind_param('s', $id);
             $stmt->execute();
             $result = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
@@ -274,6 +274,16 @@ class TransactionRepository {
     public static function eliminate($id) {
         Flight::db()->begin_transaction();
         try {
+            $stmt = Flight::db()->prepare("SELECT image FROM transaction WHERE id = ?;");
+            $stmt->bind_param('i', $id);
+            $stmt->execute();
+            $result = $stmt->get_result()->fetch_assoc();
+
+            if (is_null($result))
+                throw new Exception("The course with id: {$id} does not exist");
+
+            unlink($result['image']);
+
             $stmt = Flight::db()->prepare("DELETE FROM transaction WHERE id = ?;");
             $stmt->bind_param('s', $id);
             $stmt->execute();

@@ -147,6 +147,9 @@ class CourseService {
         if ($fileType != "jpg" && $fileType != "png" && $fileType != "jpeg")
             throw new Exception('File type not accepted only JPG, JPEG or PNG');
 
-        return $fileType;
+        list($width, $height) = getimagesize($image['tmp_name']);
+
+        if (intval($width) != 640 && intval($height) > 400)
+            throw new Exception('The only accepted resolution is 640 x 480');
     }
 }

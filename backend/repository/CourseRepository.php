@@ -35,7 +35,7 @@ class CourseRepository {
             SUM(CASE WHEN t.transaction_state = 'CANCELED' THEN 1 ELSE 0 END) AS transaction_count_canceled
             FROM course c 
             JOIN school s ON c.school_id = s.id
-            JOIN transaction t ON c.id = t.course_id
+            LEFT JOIN transaction t ON c.id = t.course_id
             GROUP BY c.id, c.name
             ORDER BY c.is_active DESC, c.name ASC;");
             $stmt->execute();
@@ -156,6 +156,16 @@ class CourseRepository {
     public static function eliminate($id) {
         Flight::db()->begin_transaction();
         try {
+            $stmt = Flight::db()->prepare("SELECT image FROM course WHERE id = ?;");
+            $stmt->bind_param('i', $id);
+            $stmt->execute();
+            $result = $stmt->get_result()->fetch_assoc();
+
+            if (is_null($result))
+                throw new Exception("The course with id: {$id} does not exist");
+
+            unlink($result['image']);
+
             $stmt = Flight::db()->prepare("DELETE FROM transaction WHERE course_id = ?;");
             $stmt->bind_param('i', $id);
             $stmt->execute();

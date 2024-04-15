@@ -68,7 +68,7 @@ Flight::route('GET /courses-admin', [$course, 'getAllByAdmin']);
 Flight::route('GET /course/@id', [$course, 'getOne']);
 Flight::route('POST /course', [$course, 'create']);
 Flight::route('POST /course-update', [$course, 'update']);
-Flight::route('PUT /school/@id/@state', [$course, 'deActivate']);
+Flight::route('PUT /course/@id/@state', [$course, 'deActivate']);
 Flight::route('DELETE /course/@id', [$course, 'delete']);
 
 //////////////////////

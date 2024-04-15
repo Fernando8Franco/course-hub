@@ -296,14 +296,6 @@ class UserRepository {
             $stmt->bind_param('s', $id);
             $stmt->execute();
 
-            $stmt = Flight::db()->prepare("DELETE FROM course WHERE id IN (SELECT course_id FROM transaction WHERE user_id = ?)");
-            $stmt->bind_param('s', $id);
-            $stmt->execute();
-
-            $stmt = Flight::db()->prepare("DELETE FROM school WHERE id IN (SELECT school_id FROM course WHERE id IN (SELECT course_id FROM transaction WHERE user_id = ?))");
-            $stmt->bind_param('s', $id);
-            $stmt->execute();
-
             $stmt = Flight::db()->prepare("DELETE FROM user WHERE id = ?");
             $stmt->bind_param('s', $id);
             $stmt->execute();
