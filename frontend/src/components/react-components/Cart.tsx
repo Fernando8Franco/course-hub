@@ -25,13 +25,13 @@ export default function Cart ({ course }: Props) {
           {course.school_name}
         </div>
         <img src={'http://localhost:8080/backend/' + course.image} alt="Course Image" className="relative top-0 left-0 w-[250.4px] h-[100px] object-cover rounded-t" />
-        <CardTitle className="h-[80px] overflow-auto flex items-center custom-scroll">
+        <CardTitle className="h-[85px] overflow-auto flex items-center custom-scroll">
           {course.name}
         </CardTitle>
         <Separator/>
       </CardHeader>
       <CardContent className='flex flex-col gap-2 text-foreground pb-1'>
-        <div className="h-[60px] overflow-auto custom-scroll text-xs">
+        <div className="h-[65px] overflow-auto custom-scroll text-xs">
           {course.description}
         </div>
         <Separator />
@@ -54,12 +54,12 @@ export default function Cart ({ course }: Props) {
           </div>
           <Separator/>
       </CardContent>
-      <CardFooter className='flex flex-row justify-around pt-2'>
+      <CardFooter className='flex flex-row justify-around pt-2' onClick={() => { reset() } }>
         <Button className='flex items-center h-8 px-4 text-sm' variant='outline'>
           <Trash2 className="h-5 w-5 mr-2" />
           Vaciar
         </Button>
-        <Button className='flex items-center h-8 px-4 text-sm' onClick={() => { reset() } }>
+        <Button className='flex items-center h-8 px-4 text-sm'>
           <CreditCard className="h-5 w-5 mr-2" />
           Pagar
         </Button>

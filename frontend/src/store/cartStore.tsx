@@ -1,5 +1,6 @@
 import { type Course } from '@/type'
 import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
 
 interface State {
   cart: Course | null
@@ -7,23 +8,30 @@ interface State {
   reset: () => void
 }
 
-const useCartStore = create<State>((set) => ({
-  cart: null,
+const useCartStore = create<State>()(
+  persist(
+    (set) => ({
+      cart: null,
 
-  setCart: (selectedCart, showToast) => {
-    set((state) => {
-      if (state.cart !== null) {
-        showToast()
-        return { cart: state.cart }
-      } else {
-        return { cart: selectedCart }
+      setCart: (selectedCart, showToast) => {
+        set((state) => {
+          if (state.cart !== null) {
+            showToast()
+            return { cart: state.cart }
+          } else {
+            return { cart: selectedCart }
+          }
+        })
+      },
+
+      reset: () => {
+        set({ cart: null })
       }
-    })
-  },
-
-  reset: () => {
-    set({ cart: null })
-  }
-}))
+    }),
+    {
+      name: 'food-storage'
+    }
+  )
+)
 
 export default useCartStore

@@ -12,3 +12,12 @@ export interface Course {
 export interface School {
   name: string
 }
+
+export interface UserData {
+  id: string
+  name: string
+  father_last_name: string
+  mother_last_name: string
+  phone_number: string
+  email: string
+}

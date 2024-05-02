@@ -5,13 +5,30 @@ import HomePage from './pages/HomePage.tsx'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import NotFoundPage from './pages/NotFoundPage.tsx'
 import { ThemeProvider } from './components/react-components/ThemeProvider.tsx'
+import Login from './components/react-components/Login.tsx'
+import Layout from './pages/Layout.tsx'
+import Register from './components/react-components/Register.tsx'
 
 const router = createBrowserRouter(
   [
     {
       path: '/',
-      element: <HomePage />,
-      errorElement: <NotFoundPage />
+      element: <Layout />,
+      errorElement: <NotFoundPage />,
+      children: [
+        {
+          path: '/',
+          element: <HomePage/>
+        },
+        {
+          path: '/login',
+          element: <Login/>
+        },
+        {
+          path: '/register',
+          element: <Register/>
+        }
+      ]
     }
   ],
   {
