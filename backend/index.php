@@ -84,4 +84,14 @@ Flight::route('POST /transaction-image', [$transaction, 'uploadImage']);
 Flight::route('PUT /transaction/@id/@state', [$transaction, 'update']);
 Flight::route('DELETE /transaction/@id', [$transaction, 'delete']);
 
+Flight::route('GET /course-img/@id', function($id) {
+    $ruta_imagen = 'course-img/' . $id;
+    if (file_exists($ruta_imagen)) {
+        header('Content-Type: image/jpeg');
+        readfile($ruta_imagen);
+    } else {
+        echo 'Image not found';
+    }
+});
+
 Flight::start();
