@@ -1,7 +1,7 @@
 import { type Course } from '@/type'
 
-export async function getCourses(): Promise<Course[]> {
-  const response = await fetch('http://localhost:8080/backend/courses')
+export async function getCourses (): Promise<Course[]> {
+  const response = await fetch(import.meta.env.VITE_BACKEND_HOST + 'courses')
   if (!response.ok) {
     throw new Error('Error en la petición')
   }

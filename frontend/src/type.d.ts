@@ -13,11 +13,21 @@ export interface School {
   name: string
 }
 
-export interface UserData {
+export interface UserInfo {
   id: string
   name: string
   father_last_name: string
   mother_last_name: string
+  phone_number: string
+  email: string
+}
+
+export interface UserData {
+  name: string
+  father_last_name: string
+  mother_last_name: string
+  password: string
+  birthday: Date
   phone_number: string
   email: string
 }

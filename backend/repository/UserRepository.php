@@ -126,7 +126,7 @@ class UserRepository {
             $father_last_name = $data->father_last_name;
             $mother_last_name = $data->mother_last_name;
             $password = password_hash($data->password, PASSWORD_DEFAULT);
-            $birthday = $data->birthday;
+            $birthday = date("Y/m/d", strtotime($data->birthday));
             $phone_number = $data->phone_number;
             $email = $data->email;
             $last_reset_request = date('Y-m-d H:i:s', time());

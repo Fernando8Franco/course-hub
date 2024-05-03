@@ -71,3 +71,19 @@
 .custom-scroll::-webkit-scrollbar-thumb {
   background-color: #888; /* Color del thumb (la barra de desplazamiento en sí) */
 }
+
+.rdp [aria-hidden="true"]{
+  @apply hidden;
+}
+
+.rdp-vhidden{
+  @apply hidden;
+}
+
+.dark .rdp-dropdown {
+  background: var(--background);
+}
+
+.dark .rdp-dropdown option {
+  background: rgba(100, 100, 100, 0.3);
+}

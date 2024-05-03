@@ -88,8 +88,8 @@ class UserService {
 
         UserRepository::save($user_type, $data);
 
-        $body = EmailService::verifyEmail($data->verification_code);
-        MailerService::sendEmail($data->email, 'Codigo de verificación', $body);
+        // $body = EmailService::verifyEmail($data->verification_code);
+        // MailerService::sendEmail($data->email, 'Codigo de verificación', $body);
 
         Flight::halt(200, json_encode(['status' => 'success', 'message' => 'Email sent correctly']));
     }
@@ -291,7 +291,7 @@ class UserService {
             if (isset($rule['max_length']) && strlen($value) > $rule['max_length'])
                 throw new Exception("The field {$field} only can have {$rule['max_length']} characters");
 
-            if (isset($rule['date_format']) && !$this->isValidDate($value, $rule['date_format']))
+            if (isset($rule['date_format']) && !$this->isValidDate($value))
                 throw new Exception($rule['error']);
 
             if (isset($rule['is_numeric']) && $rule['is_numeric'] && !ctype_digit($value))
@@ -302,9 +302,9 @@ class UserService {
         }
     }
     
-    private function isValidDate($date, $format = 'Y-m-d') {
-        $dateTime = DateTime::createFromFormat($format, $date);
-        return $dateTime && $dateTime->format($format) === $date;
+    private function isValidDate($date) {
+        $timestamp = strtotime($date);
+        return ($timestamp == true);
     }    
 
     private function isValidEmail($email) {
@@ -319,7 +319,7 @@ class UserService {
     
         if ($time_difference < 600) {
             $wait_time = 600 - $time_difference;
-            Flight::halt(400, json_encode(['status' => 'warning', 'message' => $wait_time]));
+            Flight::halt(206, json_encode(['status' => 'warning', 'message' => $wait_time]));
         }
     }
 }
