@@ -6,5 +6,5 @@ export async function getCourses (): Promise<Course[]> {
     throw new Error('Error en la petición')
   }
   const data = await response.json()
-  return data as Course[]
+  return data
 }

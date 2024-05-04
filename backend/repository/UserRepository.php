@@ -150,6 +150,26 @@ class UserRepository {
         }
     }
 
+    public static function updateVerifyCode($data) {
+        try {
+            $email = $data->email;
+            $verification_code = $data->verification_code;
+            $last_reset_request = date('Y-m-d H:i:s', time());
+
+            $stmt = Flight::db()->prepare("UPDATE user SET verification_code = ?,
+            last_reset_request = ?
+            WHERE email = ?
+            AND verification_code IS NOT NULL
+            AND verification_code != ?");
+            $stmt->bind_param('ssss', $verification_code, $last_reset_request, $email, $_ENV['BAN_USER']);
+            $stmt->execute();
+            $stmt->close();
+            Flight::db()->close();
+        } catch (Exception $e) {
+            Flight::error($e);
+        }
+    }
+
     public static function verifyCode($email, $verification_code) {
         try {
             $stmt = Flight::db()->prepare("SELECT id 

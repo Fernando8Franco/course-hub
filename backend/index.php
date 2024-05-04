@@ -23,7 +23,7 @@ mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
 Flight::map('error', function(Exception $e){
     if (str_starts_with($e->getMessage(), 'Duplicate') && str_ends_with($e->getMessage(), "'user.email'"))
-        Flight::halt(400, json_encode(['status' => 'warning', 'message' => 'The email is already registered']));
+        Flight::halt(400, json_encode(['status' => 'duplicate', 'message' => 'The email is already registered']));
     else if (str_starts_with($e->getMessage(), 'Duplicate') && str_ends_with($e->getMessage(), "'school.name'"))
         Flight::halt(400, json_encode(['status' => 'warning', 'message' => 'The school is already registered']));
     else
@@ -55,6 +55,7 @@ Flight::route('POST /user-verify', [$user, 'validateVerificationCode']);
 Flight::route('POST /send-reset-password-email', [$user, 'sendResetPasswordEmail']);
 Flight::route('POST /reset-password', [$user, 'resetPassword']);
 Flight::route('PUT /user', [$user, 'update']);
+Flight::route('PUT /user-verification-code', [$user, 'resendVerificationCode']);
 Flight::route('PUT /update-password', [$user, 'updatePassword']);
 Flight::route('PUT /user/@id/@state', [$user, 'deBanUser']);
 Flight::route('DELETE /user/@id', [$user, 'delete']);

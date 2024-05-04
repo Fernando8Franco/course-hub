@@ -10,5 +10,8 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-  base: '/course-hub'
+  base: '/course-hub',
+  optimizeDeps: {
+    exclude: ['js-big-decimal']
+  }
 })

@@ -1,9 +1,9 @@
-import { type UserInfo } from '@/type'
+import { type UserSession } from '@/type'
 import { create } from 'zustand'
 
 interface State {
   isLogIn: boolean
-  userData: UserInfo | null
+  userData: UserSession | null
 }
 
 const useUserStore = create<State>(() => ({

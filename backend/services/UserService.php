@@ -52,7 +52,7 @@ class UserService {
         
         $token = $this->getToken($email, $password);
     
-        Flight::halt(200, json_encode(['token' => $token]));
+        Flight::halt(200, json_encode(['status' => 'success', 'message' => $token]));
     }
 
     function create($user_type) {
@@ -91,14 +91,38 @@ class UserService {
         // $body = EmailService::verifyEmail($data->verification_code);
         // MailerService::sendEmail($data->email, 'Codigo de verificación', $body);
 
-        Flight::halt(200, json_encode(['status' => 'success', 'message' => 'Email sent correctly']));
+        Flight::halt(200, json_encode(['status' => 'success', 'message' => $data->email]));
+    }
+
+    function resendVerificationCode() {
+        try {
+            $data = Flight::request()->data;
+            $this->validateData($data, ['name', 'father_last_name', 'mother_last_name', 'password',
+            'birthday', 'phone_number', 'id', 'new_password', 'token', 'verification_code']);
+        } catch (Exception $e) {
+            Flight::error($e);
+        }
+
+        $data->verification_code = $this->generateVerificationCode();
+        $id = UserRepository::verifyUser($data->email, 0);
+
+        if (!is_null($id)) {
+            $result = UserRepository::getLastResetRequest($data->email);
+            $this->validateRequestTime($result);
+            UserRepository::updateVerifyCode($data);
+        }
+
+        // $body = EmailService::verifyEmail($data->verification_code);
+        // MailerService::sendEmail($data->email, 'Codigo de verificación', $body);
+
+        Flight::halt(200, json_encode(['status' => 'success', 'message' => 'Email sended correctly']));
     }
 
     function validateVerificationCode() {
         try {
             $data = Flight::request()->data;
             $this->validateData($data, ['name', 'father_last_name', 'mother_last_name', 
-            'birthday', 'phone_number', 'token', 'id', 'new_password']);
+            'password', 'birthday', 'phone_number', 'token', 'id', 'new_password']);
         } catch (Exception $e) {
             Flight::error($e);
         }
@@ -106,15 +130,8 @@ class UserService {
         $id = UserRepository::verifyCode($data->email, $data->verification_code);
 
         UserRepository::deActivate($id, 1);
-
-        $result = UserRepository::getAuthInfo($data->email);
     
-        if (!password_verify($data->password, $result['password'])) 
-            Flight::halt(400, json_encode(['status' => 'error', 'message' => 'Wrong password or email']));
-        
-        $token = encodeToken($result['id'], $result['user_type']);
-    
-        Flight::halt(200, json_encode(['token' => $token]));
+        Flight::halt(200, json_encode(['status' => 'success', 'message' => 'Validated user']));
     }
 
     function sendResetPasswordEmail() {
@@ -244,7 +261,7 @@ class UserService {
         $result = UserRepository::getAuthInfo($email);
     
         if (!password_verify($password, $result['password'])) 
-            Flight::halt(400, json_encode(['status' => 'error', 'message' => 'Wrong password or email']));
+            Flight::halt(400, json_encode(['status' => 'warning', 'message' => 'Wrong password or email']));
         
         $token = encodeToken($result['id'], $result['user_type']);
 
@@ -319,7 +336,7 @@ class UserService {
     
         if ($time_difference < 600) {
             $wait_time = 600 - $time_difference;
-            Flight::halt(206, json_encode(['status' => 'warning', 'message' => $wait_time]));
+            Flight::halt(400, json_encode(['status' => 'warning', 'message' => $wait_time]));
         }
     }
 }
