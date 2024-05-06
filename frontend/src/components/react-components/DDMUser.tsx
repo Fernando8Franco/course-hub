@@ -9,10 +9,11 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
 import { Link } from 'react-router-dom'
-import useUserStore from '@/store/userStore'
+import { useUser } from '@/hooks/useUser'
+import Cookies from 'js-cookie'
 
 export default function DDMUser () {
-  const { isLogIn } = useUserStore()
+  const { user } = useUser()
 
   return (
     <DropdownMenu>
@@ -23,29 +24,38 @@ export default function DDMUser () {
         </Button>
       </DropdownMenuTrigger>
       {
-        isLogIn
+        user !== undefined
           ? <DropdownMenuContent align="end">
-          <DropdownMenuLabel>Mi cuenta</DropdownMenuLabel>
+          <DropdownMenuLabel>{user.name}</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <Link to='/login'>
+          <Link to='/user/settings'>
             <DropdownMenuItem className='cursor-pointer'>Ajustes</DropdownMenuItem>
           </Link>
-          <Link to='/pedidos'>
+          <Link to='/user/orders'>
             <DropdownMenuItem className='cursor-pointer'>Pedidos</DropdownMenuItem>
           </Link>
+          <Link to='/user/payment'>
+            <DropdownMenuItem className='cursor-pointer'>Formas de pago</DropdownMenuItem>
+          </Link>
           <DropdownMenuSeparator />
-          <DropdownMenuItem>Cerrar sesión</DropdownMenuItem>
+          <DropdownMenuItem className='cursor-pointer'
+          onClick={() => {
+            Cookies.remove('SJSWSTN')
+            window.location.reload()
+          }}>
+            Cerrar sesión
+          </DropdownMenuItem>
         </DropdownMenuContent>
           : <DropdownMenuContent align="end">
           <Link to='/login'>
-            <DropdownMenuItem className='flex gap-2 justify-between'>
+            <DropdownMenuItem className='flex gap-2 justify-between cursor-pointer'>
               Iniciar sesión
               <LogIn className="h-5 w-5" />
             </DropdownMenuItem>
           </Link>
           <DropdownMenuSeparator/>
           <Link to='/register'>
-            <DropdownMenuItem className='flex justify-between'>
+            <DropdownMenuItem className='flex justify-between cursor-pointer'>
               Registrarse
               <UserRoundPlus className="h-5 w-5" />
             </DropdownMenuItem>

@@ -44,6 +44,7 @@ export interface UserFormData {
 export interface UserSession {
   id: string
   name: string
+  birthday: Date
   father_last_name: string
   mother_last_name: string
   phone_number: string

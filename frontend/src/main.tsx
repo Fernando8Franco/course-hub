@@ -5,9 +5,12 @@ import HomePage from './pages/HomePage.tsx'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import NotFoundPage from './pages/NotFoundPage.tsx'
 import { ThemeProvider } from './components/react-components/ThemeProvider.tsx'
-import Login from './components/react-components/Login.tsx'
+import LoginPage from './pages/LoginPage.tsx'
 import Layout from './pages/Layout.tsx'
-import Register from './components/react-components/Register.tsx'
+import RegisterPage from './pages/RegisterPage.tsx'
+import SettingsLayout from './pages/SettingsLayout.tsx'
+import SettingsPage from './pages/SettingsPage.tsx'
+import OrdersPage from './pages/OrderPage.tsx'
 
 const router = createBrowserRouter(
   [
@@ -22,11 +25,25 @@ const router = createBrowserRouter(
         },
         {
           path: '/login',
-          element: <Login/>
+          element: <LoginPage/>
         },
         {
           path: '/register',
-          element: <Register/>
+          element: <RegisterPage/>
+        },
+        {
+          path: '/user',
+          element: <SettingsLayout/>,
+          children: [
+            {
+              path: '/user/settings',
+              element: <SettingsPage/>
+            },
+            {
+              path: '/user/orders',
+              element: <OrdersPage/>
+            }
+          ]
         }
       ]
     }

@@ -61,3 +61,37 @@ export const formLoginSchema = z.object({
     message: 'Contraseña muy larga.'
   })
 })
+
+export const formUpdateCustomerSchema = z.object({
+  id: z.string(),
+  name: z.string().min(2, {
+    message: 'Nombre muy corto.'
+  }).max(40, {
+    message: 'Nombre muy largo.'
+  }),
+  father_last_name: z.string().min(2, {
+    message: 'Appellido paterno muy corto.'
+  }).max(40, {
+    message: 'Appellido paterno muy largo.'
+  }),
+  mother_last_name: z.string().min(2, {
+    message: 'Appellido materno muy corto.'
+  }).max(40, {
+    message: 'Appellido materno muy largo.'
+  }),
+  birthday: z.date({
+    required_error: 'Se requiere la fecha de nacimiento.'
+  }),
+  phone_number: z.string().regex(/^\d+$/, {
+    message: 'Solo se pueden ingresar números.'
+  }).min(10, {
+    message: 'Número de teléfono muy corto.'
+  }).max(15, {
+    message: 'Número de teléfono muy largo.'
+  }),
+  email: z.string().email({
+    message: 'Email no valido.'
+  }).max(60, {
+    message: 'Email muy largo.'
+  })
+})

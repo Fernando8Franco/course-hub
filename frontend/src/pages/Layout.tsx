@@ -1,10 +1,8 @@
 import Header from '../components/react-components/Header'
 import { Toaster } from '@/components/ui/toaster'
 import { Outlet } from 'react-router-dom'
-import Cookies from 'js-cookie'
 
 export default function Layout () {
-  console.log(Cookies.get('SSSNJWT'))
   return (
     <div className="flex min-h-screen w-full flex-col">
       <Header/>

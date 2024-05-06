@@ -20,12 +20,15 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { formLoginSchema } from '@/formSchemas'
 import { useToast } from '@/components/ui/use-toast'
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { authUser } from '@/services/User'
 import Cookies from 'js-cookie'
+import { Link, useNavigate } from 'react-router-dom'
 
 export function LoginForm () {
   const { toast } = useToast()
+  const queryClient = useQueryClient()
+  const navigate = useNavigate()
   const formLogin = useForm<z.infer<typeof formLoginSchema>>({
     resolver: zodResolver(formLoginSchema),
     defaultValues: {
@@ -33,11 +36,12 @@ export function LoginForm () {
       password: ''
     }
   })
-
   const { mutateAsync: mutateAuth, isPending } = useMutation({
     mutationFn: authUser,
     onSuccess: (data) => {
-      Cookies.set('SSSNJWT', data.message, { expires: (1 / 1440) * 1 })
+      Cookies.set('SJSWSTN', data.message)
+      void queryClient.invalidateQueries({ queryKey: ['user'] })
+      navigate('/')
     },
     onError: (error) => {
       toast({
@@ -61,7 +65,7 @@ export function LoginForm () {
         </CardDescription>
       </CardHeader>
       <CardContent className="grid gap-4">
-      <Form {...formLogin}>
+        <Form {...formLogin}>
           <form onSubmit={formLogin.handleSubmit(onSubmitOTPForm)}>
             <FormField
               control={formLogin.control}
@@ -70,7 +74,7 @@ export function LoginForm () {
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input type='email' {...field} />
+                    <Input type='email' placeholder="f@ejemplo.com" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -81,9 +85,14 @@ export function LoginForm () {
               name="password"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Contraseña</FormLabel>
+                  <div className="pt-2 flex items-center">
+                    <FormLabel htmlFor='password'>Contraseña</FormLabel>
+                    <Link to='/reset-password' className="ml-auto inline-block text-sm underline">
+                      ¿Olvidaste tu contraseña?
+                    </Link>
+                  </div>
                   <FormControl>
-                    <Input type='password' {...field} />
+                    <Input id='password' type='password' {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

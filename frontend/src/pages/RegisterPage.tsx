@@ -1,8 +1,8 @@
 import { useState } from 'react'
-import VerificationForm from './VerificationForm'
-import RegisterForm from './RegisterForm'
+import VerificationForm from '../components/react-components/VerificationForm'
+import RegisterForm from '../components/react-components/RegisterForm'
 
-export default function Register () {
+export default function RegisterPage () {
   const [isSubmited, setIsSubmited] = useState(false)
   const [email, setEmail] = useState('')
 

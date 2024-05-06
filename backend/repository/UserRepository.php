@@ -50,7 +50,7 @@ class UserRepository {
 
     public static function getOneByToken($id) {
         try {
-            $stmt = Flight::db()->prepare("SELECT id, name, father_last_name, 
+            $stmt = Flight::db()->prepare("SELECT id, name, birthday, father_last_name, 
             mother_last_name, phone_number, email 
             FROM user 
             WHERE id = ? 
