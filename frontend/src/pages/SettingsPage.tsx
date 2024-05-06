@@ -21,6 +21,7 @@ import {
 } from '@/components/ui/popover'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Checkbox } from '@/components/ui/checkbox'
 import { Calendar } from '@/components/ui/calendar'
 import { useToast } from '@/components/ui/use-toast'
 import { type z } from 'zod'
@@ -34,19 +35,36 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { updateCostumer } from '@/services/User'
 import { formUpdateCustomerSchema } from '@/formSchemas'
 import { Separator } from '@/components/ui/separator'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import Cookies from 'js-cookie'
 
 export default function SettingsPage () {
   const { toast } = useToast()
+  const [isDisable, setIsDisable] = useState(true)
   const { user, isLoading } = useUser()
+  const navigate = useNavigate()
   const queryClient = useQueryClient()
 
   const { mutateAsync: updateUser, isPending } = useMutation({
     mutationFn: updateCostumer,
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['user'] })
+      toast({
+        title: 'Los datos fueron actualizados correctamente.'
+      })
+      setIsDisable(true)
     },
     onError: (error) => {
+      if (error.message === 'Expired token') {
+        Cookies.remove('SJSWSTN')
+        toast({
+          title: 'Oh no!',
+          description: 'La sesión a caducado. Por favor vuelve a iniciar sesión'
+        })
+        navigate('/login')
+        return
+      }
       toast({
         variant: 'destructive',
         title: 'Oh no!',
@@ -81,18 +99,31 @@ export default function SettingsPage () {
     }
   }
 
+  function handleCheckedChange (e: boolean) {
+    setIsDisable(!e)
+  }
+
   return (
     <div className="grid gap-6">
       <Card>
         <CardHeader>
           <CardTitle className="text-2xl">
-            Registro
+            Usuario
           </CardTitle>
           <CardDescription>
-            Llena el siguiente formulario para crear tu cuenta.
+            Datos del usuario
           </CardDescription>
         </CardHeader>
         <CardContent>
+          <div className="flex items-center space-x-2 pb-3">
+            <Checkbox id="data" checked={!isDisable} onCheckedChange={handleCheckedChange}/>
+            <label
+              htmlFor="data"
+              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            >
+              Modificar los datos
+            </label>
+          </div>
           <Form {...formUpdateUser}>
             <form onSubmit={formUpdateUser.handleSubmit(onSubmitUserForm)}>
               <div className="grid gap-1.5 grid-cols-1 sm:grid-cols-3">
@@ -103,7 +134,7 @@ export default function SettingsPage () {
                     <FormItem>
                       <FormLabel>Nombre</FormLabel>
                       <FormControl>
-                        <Input {...field} />
+                        <Input {...field} disabled={isDisable}/>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -116,7 +147,7 @@ export default function SettingsPage () {
                     <FormItem>
                       <FormLabel>Apellido Paterno</FormLabel>
                       <FormControl>
-                        <Input placeholder="Pérez" {...field} />
+                        <Input {...field} disabled={isDisable}/>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -129,7 +160,7 @@ export default function SettingsPage () {
                     <FormItem>
                       <FormLabel>Apellido Materno</FormLabel>
                       <FormControl>
-                        <Input placeholder="Hernández" {...field} />
+                        <Input {...field} disabled={isDisable}/>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -146,6 +177,7 @@ export default function SettingsPage () {
                           <FormControl>
                             <Button
                               variant={'outline'}
+                              disabled={isDisable}
                               className={cn(
                                 'w-full pl-3 text-left font-normal',
                                 !(field.value != null) && 'text-muted-foreground'
@@ -186,7 +218,7 @@ export default function SettingsPage () {
                     <FormItem>
                       <FormLabel>No. Teléfonico</FormLabel>
                       <FormControl>
-                        <Input placeholder="1234567891" {...field} />
+                        <Input {...field} disabled={isDisable}/>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -199,7 +231,7 @@ export default function SettingsPage () {
                     <FormItem>
                       <FormLabel>Email</FormLabel>
                       <FormControl>
-                        <Input placeholder="ejemplo@gmail.com" {...field} />
+                        <Input {...field} disabled={isDisable}/>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -210,7 +242,7 @@ export default function SettingsPage () {
                 <Separator/>
               </div>
               <div className='flex justify-end pt-6'>
-                <Button type="submit" disabled={isPending}>
+                <Button type="submit" disabled={isDisable || isPending}>
                   {!isPending ? 'Actualizar' : 'Actualizando...'}
                 </Button>
               </div>

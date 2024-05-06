@@ -124,12 +124,11 @@ class TransactionRepository {
         try {
             $stmt = Flight::db()->prepare("SELECT t.id transaction_id, t.date_purchase, 
             t.total_amount, t.transaction_state, t.image,
-            c.name course_name, c.is_active course_is_active
+            c.name course_name
             FROM transaction t
             JOIN user u ON t.user_id = u.id
             JOIN course c ON t.course_id = c.id
-            AND u.is_active = 1
-            AND u.id = ?
+            AND u.is_active = 1 AND u.id = ?
             ORDER BY c.is_active DESC, t.date_purchase DESC;");
             $stmt->bind_param('s', $id);
             $stmt->execute();

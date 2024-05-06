@@ -1,4 +1,4 @@
-import { type UserCode, type Response, type UserFormData, type UserLogIn, type UserSession } from '@/type'
+import { type UserCode, type Response, type UserFormData, type UserLogIn, type UserSession, type UserPasswords } from '@/type'
 import Cookies from 'js-cookie'
 
 export async function createUser (data: UserFormData): Promise<Response> {
@@ -105,12 +105,35 @@ export async function updateCostumer (data: UserSession): Promise<Response> {
   const requestOptions = {
     method: 'PUT',
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${Cookies.get('SJSWSTN')}`
     },
     body: JSON.stringify(data)
   }
 
   const response = await fetch(import.meta.env.VITE_BACKEND_HOST + 'user', requestOptions)
+  if (!response.ok) {
+    const error = await response.json() as Response
+    let errorMessage = error.message
+    if (error.status === 'duplicate') errorMessage = 'El email ya esta registrado.'
+    throw new Error(errorMessage)
+  }
+
+  const apiResponse = await response.json()
+  return apiResponse
+}
+
+export async function updatePassword (data: UserPasswords): Promise<Response> {
+  const requestOptions = {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${Cookies.get('SJSWSTN')}`
+    },
+    body: JSON.stringify(data)
+  }
+
+  const response = await fetch(import.meta.env.VITE_BACKEND_HOST + 'update-password', requestOptions)
   if (!response.ok) {
     const error = await response.json() as Response
     throw new Error(error.message)

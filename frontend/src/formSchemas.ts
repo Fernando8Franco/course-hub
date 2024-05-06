@@ -35,6 +35,8 @@ export const formUserSchema = z.object({
     message: 'Contraseña muy corta.'
   }).max(80, {
     message: 'Contraseña muy larga.'
+  }).regex(/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{5,80}/, {
+    message: 'La contraseña debe contener al menos una letra mayúscula, una letra minúscula, un número y un carácter especial.'
   })
 })
 
@@ -79,7 +81,7 @@ export const formUpdateCustomerSchema = z.object({
   }).max(40, {
     message: 'Appellido materno muy largo.'
   }),
-  birthday: z.date({
+  birthday: z.coerce.date({
     required_error: 'Se requiere la fecha de nacimiento.'
   }),
   phone_number: z.string().regex(/^\d+$/, {
@@ -93,5 +95,20 @@ export const formUpdateCustomerSchema = z.object({
     message: 'Email no valido.'
   }).max(60, {
     message: 'Email muy largo.'
+  })
+})
+
+export const formUpdatePasswordSchema = z.object({
+  password: z.string().min(5, {
+    message: 'Contraseña muy corta.'
+  }).max(80, {
+    message: 'Contraseña muy larga.'
+  }),
+  new_password: z.string().min(5, {
+    message: 'Contraseña muy corta.'
+  }).max(80, {
+    message: 'Contraseña muy larga.'
+  }).regex(/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{5,80}/, {
+    message: 'La contraseña debe contener al menos una letra mayúscula, una letra minúscula, un número y un carácter especial.'
   })
 })

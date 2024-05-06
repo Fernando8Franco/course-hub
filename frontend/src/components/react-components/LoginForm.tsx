@@ -52,8 +52,12 @@ export function LoginForm () {
     }
   })
 
-  async function onSubmitOTPForm (formData: z.infer<typeof formLoginSchema>) {
-    await mutateAuth(formData)
+  async function onSubmitLoginForm (formData: z.infer<typeof formLoginSchema>) {
+    try {
+      await mutateAuth(formData)
+    } catch (e) {
+      console.log(e)
+    }
   }
 
   return (
@@ -66,7 +70,7 @@ export function LoginForm () {
       </CardHeader>
       <CardContent className="grid gap-4">
         <Form {...formLogin}>
-          <form onSubmit={formLogin.handleSubmit(onSubmitOTPForm)}>
+          <form onSubmit={formLogin.handleSubmit(onSubmitLoginForm)}>
             <FormField
               control={formLogin.control}
               name="email"

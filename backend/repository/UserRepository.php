@@ -249,7 +249,7 @@ class UserRepository {
             $name = $data->name;
             $father_last_name = $data->father_last_name;
             $mother_last_name = $data->mother_last_name;
-            $birthday = $data->birthday;
+            $birthday = date("Y/m/d", strtotime($data->birthday));
             $phone_number = $data->phone_number;
             $email = $data->email;
 

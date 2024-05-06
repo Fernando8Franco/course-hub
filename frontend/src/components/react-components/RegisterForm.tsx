@@ -68,13 +68,13 @@ export default function RegisterForm ({ setIsSubmited, setEmail }: Props) {
   })
 
   async function onSubmitUserForm (formData: z.infer<typeof formUserSchema>) {
-    console.log('xd')
     try {
       await mutateUser(formData)
     } catch (e) {
       console.log(e)
     }
   }
+
   return (
     <Card className="mx-auto my-auto max-w-sm">
       <CardHeader>

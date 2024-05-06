@@ -60,3 +60,17 @@ export interface UserLogIn {
   email: string
   password: string
 }
+
+export interface UserPasswords {
+  password: string
+  password: string
+}
+
+export interface UserTransaction {
+  transaction_id: string
+  date_purchase: Date
+  total_amount: string
+  transaction_state: string
+  image: string
+  course_name: string
+}
