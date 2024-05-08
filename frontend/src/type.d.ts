@@ -49,6 +49,7 @@ export interface UserSession {
   mother_last_name: string
   phone_number: string
   email: string
+  transactions: CostumerTransaction[]
 }
 
 export interface UserCode {
@@ -66,11 +67,21 @@ export interface UserPasswords {
   password: string
 }
 
-export interface UserTransaction {
+export interface CostumerTransaction {
   transaction_id: string
   date_purchase: Date
   total_amount: string
   transaction_state: string
   image: string
   course_name: string
+}
+
+export interface UserTransactionImage {
+  transaction_id: string
+  image?: FileList
+}
+
+export interface StatusVariant {
+  name: string
+  variant: 'default' | 'destructive' | 'success' | 'outline' | 'secondary' | null | undefined
 }

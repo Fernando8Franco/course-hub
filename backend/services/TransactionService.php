@@ -69,7 +69,7 @@ class TransactionService {
 
             if (is_null($course_id))
                 throw new Exception('The field course_id can not be empty');
-            if (!ctype_digit($course_id))
+            if (!ctype_digit((string)$course_id))
                 throw new Exception('Not valid course id');
 
         } catch (Exception $e) {
@@ -135,7 +135,7 @@ class TransactionService {
             throw new Exception('The field image can not be empty');
 
         if ($image['size'] > 300000)
-            throw new Exception('The image can not size more than 500KB');
+            throw new Exception('Image to large');
 
         $fileType = strtolower(pathinfo($image['full_path'],PATHINFO_EXTENSION));
         if ($fileType != "jpg" && $fileType != "png" && $fileType != "jpeg")

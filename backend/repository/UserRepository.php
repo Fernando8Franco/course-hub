@@ -57,14 +57,25 @@ class UserRepository {
             AND is_active = 1");
             $stmt->bind_param('s', $id);
             $stmt->execute();
-            $result = $stmt->get_result()->fetch_assoc();
-            $stmt->close();
-            Flight::db()->close();
+            $user = $stmt->get_result()->fetch_assoc();
 
-            if (is_null($result))
+            if (is_null($user))
                 throw new Exception('The user not exist');
 
-            return $result;
+            $stmt = Flight::db()->prepare("SELECT t.id transaction_id, t.date_purchase, 
+            t.total_amount, t.transaction_state, t.image,
+            c.name course_name
+            FROM transaction t
+            JOIN user u ON t.user_id = u.id
+            JOIN course c ON t.course_id = c.id
+            AND u.is_active = 1 AND u.id = ?
+            ORDER BY c.is_active DESC, t.date_purchase DESC;");
+            $stmt->bind_param('s', $id);
+            $stmt->execute();
+            $transactions = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+            $user['transactions'] = $transactions;
+
+            return $user;
         } catch (Exception $e) {
             Flight::error($e);
         }

@@ -1,4 +1,4 @@
-import Header from '../components/react-components/Header'
+import Header from '../../components/react-components/Header'
 import { Toaster } from '@/components/ui/toaster'
 import { Outlet } from 'react-router-dom'
 

@@ -8,16 +8,18 @@ import './index.css'
 import HomePageSkeleton from './pages/Skeletons/HomePageSkeleton.tsx'
 import UserPageSkeleton from './pages/Skeletons/UserPageSkeleton.tsx'
 import { Skeleton } from './components/ui/skeleton.tsx'
+import TestPage from './pages/TestPage.tsx'
+import PaymentPage from './pages/PaymentPage.tsx'
 
 const HomePage = lazy(async () => await import('./pages/HomePage.tsx'))
 const LoginPage = lazy(async () => await import('./pages/LoginPage.tsx'))
 const RegisterPage = lazy(async () => await import('./pages/RegisterPage.tsx'))
-const SettingsLayout = lazy(async () => await import('./pages/SettingsLayout.tsx'))
+const SettingsLayout = lazy(async () => await import('./pages/Layouts/SettingsLayout.tsx'))
 const SettingsPage = lazy(async () => await import('./pages/SettingsPage.tsx'))
 const UpdatePasswordPage = lazy(async () => await import('./pages/UpdatePasswordPage.tsx'))
 const OrdersPage = lazy(async () => await import('./pages/OrderPage.tsx'))
 const NotFoundPage = lazy(async () => await import('./pages/NotFoundPage.tsx'))
-const Layout = lazy(async () => await import('./pages/Layout.tsx'))
+const Layout = lazy(async () => await import('./pages/Layouts/Layout.tsx'))
 
 const router = createBrowserRouter(
   [
@@ -40,7 +42,7 @@ const router = createBrowserRouter(
         },
         {
           path: '/test',
-          element: <UserPageSkeleton/>
+          element: <TestPage/>
         },
         {
           path: '/user',
@@ -57,6 +59,10 @@ const router = createBrowserRouter(
             {
               path: '/user/orders',
               element: <Suspense><OrdersPage/></Suspense>
+            },
+            {
+              path: '/user/payment',
+              element: <Suspense><PaymentPage/></Suspense>
             }
           ]
         }

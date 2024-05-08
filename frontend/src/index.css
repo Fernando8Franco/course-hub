@@ -87,3 +87,8 @@
 .dark .rdp-dropdown option {
   background: rgba(100, 100, 100, 0.3);
 }
+
+.image-button {
+  color: var(--destructive);
+  background-color: var(--destructive);
+}

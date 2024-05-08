@@ -15,7 +15,7 @@ const navLinks = [
     name: 'Pedidos'
   },
   {
-    link: '/user/payments',
+    link: '/user/payment',
     name: 'Formas de Pago'
   }
 ]

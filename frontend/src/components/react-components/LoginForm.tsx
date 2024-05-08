@@ -29,6 +29,7 @@ export function LoginForm () {
   const { toast } = useToast()
   const queryClient = useQueryClient()
   const navigate = useNavigate()
+
   const formLogin = useForm<z.infer<typeof formLoginSchema>>({
     resolver: zodResolver(formLoginSchema),
     defaultValues: {
@@ -41,6 +42,10 @@ export function LoginForm () {
     onSuccess: (data) => {
       Cookies.set('SJSWSTN', data.message)
       void queryClient.invalidateQueries({ queryKey: ['user'] })
+      toast({
+        variant: 'success',
+        title: 'Sesión iniciada correctamente'
+      })
       navigate('/')
     },
     onError: (error) => {
@@ -102,9 +107,13 @@ export function LoginForm () {
                 </FormItem>
               )}
             />
-            <div className='pt-4'>
+            <div className='flex flex-col gap-2 pt-4'>
               <Button type="submit" className='w-full' disabled={isPending}>
                 {!isPending ? 'Iniciar Sesión' : 'Iniciando...'}
+              </Button>
+              <Button variant='link' className='w-full'
+                onClick={() => { navigate('/register') }}>
+                Registrese Aquí
               </Button>
             </div>
           </form>

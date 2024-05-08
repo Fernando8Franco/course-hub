@@ -112,3 +112,16 @@ export const formUpdatePasswordSchema = z.object({
     message: 'La contraseña debe contener al menos una letra mayúscula, una letra minúscula, un número y un carácter especial.'
   })
 })
+
+const MAX_IMAGE_SIZE_BYTES = 300 * 1024
+
+export const formImageSchema = z.object({
+  transaction_id: z.string(),
+  image: z.instanceof(FileList)
+    .optional()
+    .refine((file) => file?.length === 1, 'Seleccione una imagen')
+    .refine((fileList) => {
+      const file = fileList?.[0]
+      return (file != null) ? file.size <= MAX_IMAGE_SIZE_BYTES : true
+    }, { message: 'La imagen es demasiado grande. El tamaño máximo permitido es de 300 KB' })
+})
