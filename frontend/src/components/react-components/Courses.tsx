@@ -1,25 +1,11 @@
-import { useCourses } from '@/hooks/useCourses'
-import Curso from './Course'
 import { SkeletonCard } from './SkeletonCard'
+import CourseCard from './CourseCard'
 import useSchoolStore from '@/store/schoolStore'
-import { useToast } from '@/components/ui/use-toast'
-import { useEffect } from 'react'
+import { useCourses } from '@/hooks/useCourses'
 
-export default function Cursos () {
-  const { isLoading, isError, courses } = useCourses()
+export default function Courses () {
   const { selectedSchool } = useSchoolStore()
-  const { toast } = useToast()
-
-  useEffect(() => {
-    if (isError) {
-      toast({
-        variant: 'destructive',
-        title: 'Error al cargar los cursos',
-        description: 'Hubo un error al cargar lo cursos'
-      })
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isError])
+  const { isLoading, isError, courses } = useCourses()
 
   const filteredCourses = (selectedSchool === 'All')
     ? courses
@@ -39,7 +25,7 @@ export default function Cursos () {
     <div className="flex flex-wrap gap-4 justify-center">
       {
         filteredCourses?.map(course => (
-          <Curso key={course.id} course={course}/>
+          <CourseCard key={course.id} course={course}/>
         ))
       }
     </div>

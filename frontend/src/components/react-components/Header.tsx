@@ -16,7 +16,6 @@ export default function Header () {
           onClick={() => { setSelectedSchool('All') }}
         >
           <GraduationCap className="h-6 w-6" />
-          <span className="sr-only">Acme Inc</span>
         </Link>
       </nav>
       <div className="flex w-full items-center justify-end gap-4 md:ml-auto md:gap-2 lg:gap-4">

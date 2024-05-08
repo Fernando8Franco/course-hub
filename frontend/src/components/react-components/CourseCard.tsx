@@ -17,20 +17,20 @@ interface Props {
   course: Course
 }
 
-export default function Curso ({ course }: Props) {
-  const { setCart, reset } = useCartStore()
+export default function CourseCard ({ course }: Props) {
+  const { cart, setCart, reset } = useCartStore()
   const { toast } = useToast()
 
-  const showToast = () => {
-    toast({
-      title: 'El carrito esta lleno.',
-      description: 'Solo se puede agregar un curso al carrito, vacialo si es que quieres cambiar el curso.',
-      action: <ToastAction altText="Try again" onClick={() => { reset() }}>Vaciar</ToastAction>
-    })
-  }
-
-  const createHandleClick = (course: Course, showToast: () => void) => () => {
-    setCart(course, showToast)
+  const createHandleClick = (course: Course) => {
+    if (cart === null) {
+      setCart(course)
+    } else {
+      toast({
+        title: 'El carrito esta lleno.',
+        description: 'Solo se puede agregar un curso al carrito, vacialo si es que quieres cambiar el curso.',
+        action: <ToastAction altText="Try again" onClick={() => { reset() }}>Vaciar</ToastAction>
+      })
+    }
   }
 
   return (
@@ -71,7 +71,7 @@ export default function Curso ({ course }: Props) {
       </CardContent>
       <CardFooter className='flex justify-center pb-4 pt-1'>
         <Button className='h-8 w-18 text-sm'
-          onClick={createHandleClick(course, showToast)}
+          onClick={() => { createHandleClick(course) }}
         >
           Agregar
         </Button>

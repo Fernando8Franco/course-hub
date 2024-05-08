@@ -8,19 +8,16 @@ import {
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
-import { useState } from 'react'
 import { useCourses } from '@/hooks/useCourses'
 import useSchoolStore from '@/store/schoolStore'
 
 export default function Filter () {
-  const [selectedFilter, setSelectedFilter] = useState('All')
   const { courses } = useCourses()
-  const { setSelectedSchool } = useSchoolStore()
+  const { selectedSchool, setSelectedSchool } = useSchoolStore()
 
   const uniqueSchools: string[] = Array.from(new Set(courses?.map(course => course.school_name)))
 
   const handleFilterChange = (filter: string) => {
-    setSelectedFilter(filter)
     setSelectedSchool(filter)
   }
 
@@ -35,10 +32,10 @@ export default function Filter () {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuLabel className='text-center'>Filtar por escuela</DropdownMenuLabel>
+        <DropdownMenuLabel className='text-center'>Filtrar por escuela</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuCheckboxItem
-            checked={selectedFilter === 'All'}
+            checked={selectedSchool === 'All'}
             onSelect={() => { handleFilterChange('All') }}
             className='text-center'
           >
@@ -49,7 +46,7 @@ export default function Filter () {
             <div key={index}>
             <DropdownMenuSeparator/>
             <DropdownMenuCheckboxItem key={school}
-              checked={selectedFilter === school}
+              checked={selectedSchool === school}
               onSelect={() => { handleFilterChange(school) }}
               className='text-center'
             >

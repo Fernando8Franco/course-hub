@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button'
 import {
   Form,
   FormControl,
@@ -14,29 +13,23 @@ import {
   CardHeader,
   CardTitle
 } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { type z } from 'zod'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm } from 'react-hook-form'
-import { formLoginSchema } from '@/formSchemas'
 import { useToast } from '@/components/ui/use-toast'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { authUser } from '@/services/User'
+import { type z } from 'zod'
 import Cookies from 'js-cookie'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Link, useNavigate } from 'react-router-dom'
+import { authUser } from '@/services/User'
+import useLoginForm from '@/hooks/useLoginForm'
 
 export function LoginForm () {
   const { toast } = useToast()
   const queryClient = useQueryClient()
   const navigate = useNavigate()
 
-  const formLogin = useForm<z.infer<typeof formLoginSchema>>({
-    resolver: zodResolver(formLoginSchema),
-    defaultValues: {
-      email: '',
-      password: ''
-    }
-  })
+  const { formLoginSchema, formLogin } = useLoginForm()
+
   const { mutateAsync: mutateAuth, isPending } = useMutation({
     mutationFn: authUser,
     onSuccess: (data) => {

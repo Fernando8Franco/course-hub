@@ -12,7 +12,6 @@ export const useUser = () => {
     queryFn: userInfo,
     refetchOnMount: false,
     refetchOnWindowFocus: false,
-    refetchOnReconnect: false,
     staleTime: Infinity,
     retry: (failureCount, error) => {
       if (error.message === 'No token') return false
@@ -40,6 +39,7 @@ export const useUser = () => {
         description: error.message
       })
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isError])
 
   return { user, isLoading }

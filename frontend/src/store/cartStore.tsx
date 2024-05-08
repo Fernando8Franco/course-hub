@@ -4,7 +4,7 @@ import { persist } from 'zustand/middleware'
 
 interface State {
   cart: Course | null
-  setCart: (school: Course, showToast: () => void) => void
+  setCart: (school: Course) => void
   reset: () => void
 }
 
@@ -13,23 +13,14 @@ const useCartStore = create<State>()(
     (set) => ({
       cart: null,
 
-      setCart: (selectedCart, showToast) => {
-        set((state) => {
-          if (state.cart !== null) {
-            showToast()
-            return { cart: state.cart }
-          } else {
-            return { cart: selectedCart }
-          }
-        })
-      },
+      setCart: (cart) => { set({ cart }) },
 
       reset: () => {
         set({ cart: null })
       }
     }),
     {
-      name: 'food-storage'
+      name: 'course-storage'
     }
   )
 )
