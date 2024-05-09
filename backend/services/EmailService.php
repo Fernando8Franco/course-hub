@@ -23,7 +23,7 @@ class EmailService {
             </style>
         </head>
         <body>
-            Haga click <a href="{$_ENV['HOST_FRONT']}/reset-password/{$token}">aquí</a> para cambiar su contraseña.
+            Haga click <a href="{$_ENV['HOST_FRONT']}{$token}">aquí</a> para cambiar su contraseña.
         </body>
         </html>
         END;

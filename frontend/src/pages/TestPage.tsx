@@ -1,5 +1,7 @@
+import { Skeleton } from '@/components/ui/skeleton'
+
 export default function TestPage () {
   return (
-    <h1>Test</h1>
+    <Skeleton className='mx-auto my-auto w-[385px] h-[405px]' />
   )
 }

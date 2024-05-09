@@ -15,44 +15,19 @@ import {
 } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { useToast } from '@/components/ui/use-toast'
 import { type z } from 'zod'
-import Cookies from 'js-cookie'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Link, useNavigate } from 'react-router-dom'
-import { authUser } from '@/services/User'
 import useLoginForm from '@/hooks/useLoginForm'
+import useMutateLogin from '@/hooks/useMutateLogin'
 
 export function LoginForm () {
-  const { toast } = useToast()
-  const queryClient = useQueryClient()
   const navigate = useNavigate()
-
   const { formLoginSchema, formLogin } = useLoginForm()
-
-  const { mutateAsync: mutateAuth, isPending } = useMutation({
-    mutationFn: authUser,
-    onSuccess: (data) => {
-      Cookies.set('SJSWSTN', data.message)
-      void queryClient.invalidateQueries({ queryKey: ['user'] })
-      toast({
-        variant: 'success',
-        title: 'Sesión iniciada correctamente'
-      })
-      navigate('/')
-    },
-    onError: (error) => {
-      toast({
-        variant: 'destructive',
-        title: 'Oh no!',
-        description: error.message
-      })
-    }
-  })
+  const { mutateLogin, isPendingLogin } = useMutateLogin()
 
   async function onSubmitLoginForm (formData: z.infer<typeof formLoginSchema>) {
     try {
-      await mutateAuth(formData)
+      await mutateLogin(formData)
     } catch (e) {
       console.log(e)
     }
@@ -76,7 +51,7 @@ export function LoginForm () {
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input type='email' placeholder="f@ejemplo.com" {...field} />
+                    <Input type='email' placeholder="ejemplo@course.com" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -89,7 +64,7 @@ export function LoginForm () {
                 <FormItem>
                   <div className="pt-2 flex items-center">
                     <FormLabel htmlFor='password'>Contraseña</FormLabel>
-                    <Link to='/reset-password' className="ml-auto inline-block text-sm underline">
+                    <Link to='/send-reset' className="ml-auto inline-block text-sm underline">
                       ¿Olvidaste tu contraseña?
                     </Link>
                   </div>
@@ -101,8 +76,8 @@ export function LoginForm () {
               )}
             />
             <div className='flex flex-col gap-2 pt-4'>
-              <Button type="submit" className='w-full' disabled={isPending}>
-                {!isPending ? 'Iniciar Sesión' : 'Iniciando...'}
+              <Button type="submit" className='w-full' disabled={isPendingLogin}>
+                {!isPendingLogin ? 'Iniciar Sesión' : 'Iniciando...'}
               </Button>
               <Button variant='link' className='w-full'
                 onClick={() => { navigate('/register') }}>

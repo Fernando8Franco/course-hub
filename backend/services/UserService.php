@@ -88,8 +88,8 @@ class UserService {
 
         UserRepository::save($user_type, $data);
 
-        // $body = EmailService::verifyEmail($data->verification_code);
-        // MailerService::sendEmail($data->email, 'Codigo de verificación', $body);
+        $body = EmailService::verifyEmail($data->verification_code);
+        MailerService::sendEmail($data->email, 'Codigo de verificación', $body);
 
         Flight::halt(200, json_encode(['status' => 'success', 'message' => $data->email]));
     }
@@ -112,8 +112,8 @@ class UserService {
             UserRepository::updateVerifyCode($data);
         }
 
-        // $body = EmailService::verifyEmail($data->verification_code);
-        // MailerService::sendEmail($data->email, 'Codigo de verificación', $body);
+        $body = EmailService::verifyEmail($data->verification_code);
+        MailerService::sendEmail($data->email, 'Codigo de verificación', $body);
 
         Flight::halt(200, json_encode(['status' => 'success', 'message' => 'Email sended correctly']));
     }

@@ -14,6 +14,8 @@ const NotFoundPage = lazy(async () => await import('./pages/NotFoundPage.tsx'))
 const Layout = lazy(async () => await import('./pages/Layouts/Layout.tsx'))
 const HomePage = lazy(async () => await import('./pages/HomePage.tsx'))
 const LoginPage = lazy(async () => await import('./pages/LoginPage.tsx'))
+const SendResetPage = lazy(async () => await import('./pages/SendResetPage.tsx'))
+const ResetPasswordPage = lazy(async () => await import('./pages/ResetPasswordPage.tsx'))
 const RegisterPage = lazy(async () => await import('./pages/RegisterPage.tsx'))
 const SettingsLayout = lazy(async () => await import('./pages/Layouts/SettingsLayout.tsx'))
 const SettingsPage = lazy(async () => await import('./pages/SettingsPage.tsx'))
@@ -41,14 +43,28 @@ const router = createBrowserRouter(
         {
           path: '/login',
           element:
-          <Suspense>
+          <Suspense fallback={<Skeleton className='mx-auto my-auto w-[385px] h-[405px]' />}>
             <LoginPage />
+          </Suspense>
+        },
+        {
+          path: '/send-reset',
+          element:
+          <Suspense fallback={<Skeleton className='mx-auto my-auto w-[385px] h-[295px]' />}>
+            <SendResetPage />
+          </Suspense>
+        },
+        {
+          path: '/reset-password/:token',
+          element:
+          <Suspense fallback={<Skeleton className='mx-auto my-auto w-[385px] h-[350px]' />}>
+            <ResetPasswordPage />
           </Suspense>
         },
         {
           path: '/register',
           element:
-          <Suspense>
+          <Suspense fallback={<Skeleton className='mx-auto my-auto w-[385px] h-[495px]' />}>
             <RegisterPage />
           </Suspense>
         },
@@ -80,14 +96,14 @@ const router = createBrowserRouter(
             {
               path: '/user/orders',
               element:
-              <Suspense>
+              <Suspense fallback={<Skeleton className='mx-auto w-full gap-2 h-[480px]' />}>
                 <OrdersPage/>
               </Suspense>
             },
             {
               path: '/user/payment',
               element:
-              <Suspense>
+              <Suspense fallback={<Skeleton className='mx-auto w-full gap-2 h-[520px]' />}>
                 <PaymentPage/>
               </Suspense>
             }
