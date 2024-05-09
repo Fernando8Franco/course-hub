@@ -19,68 +19,36 @@ import {
   CardTitle,
   CardFooter
 } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { type z } from 'zod'
-import { useMutation } from '@tanstack/react-query'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useToast } from '@/components/ui/use-toast'
-import { useForm } from 'react-hook-form'
-import { formOTPShema } from '@/formSchemas'
-import { useNavigate } from 'react-router-dom'
-import { resendVerificationCode, verifyUser } from '@/services/User'
+import useVerficationForm from '@/hooks/forms/useVerificationForm'
+import useMutateVerification from '@/hooks/useMutateVerification'
 
 interface Props {
   email: string
 }
 
 export default function VerificationForm ({ email }: Props) {
-  const { toast } = useToast()
-  const navigate = useNavigate()
-  const { mutateAsync: mutateVerificationCode, isPending: isPendingResend } = useMutation({
-    mutationFn: resendVerificationCode,
-    onSuccess: () => {
-      toast({
-        title: 'El email fue reenviado.'
-      })
-    },
-    onError: (error) => {
-      toast({
-        variant: 'destructive',
-        title: 'Oh no!',
-        description: error.message
-      })
-    }
-  })
+  const {
+    mutateVerification,
+    isPendingVerification,
+    mutateSendVerification,
+    isPendingSendVerification
+  } = useMutateVerification()
 
-  const { mutateAsync: mutateValidUser, isPending: isPendingVerify } = useMutation({
-    mutationFn: verifyUser,
-    onSuccess: () => {
-      toast({
-        title: 'El usuario fue validado correctamente.'
-      })
-      navigate('/login')
-    },
-    onError: (error) => {
-      toast({
-        variant: 'destructive',
-        title: 'Oh no!',
-        description: error.message
-      })
-    }
-  })
+  const { formVerificationShema, formVerification } = useVerficationForm({ email })
 
-  const formOTP = useForm<z.infer<typeof formOTPShema>>({
-    resolver: zodResolver(formOTPShema),
-    defaultValues: {
-      verification_code: '',
-      email
-    }
-  })
-
-  async function onSubmitOTPForm (formData: z.infer<typeof formOTPShema>) {
+  async function onSubmitOTPForm (formData: z.infer<typeof formVerificationShema>) {
     try {
-      await mutateValidUser(formData)
+      await mutateVerification(formData)
+    } catch (e) {
+      console.log(e)
+    }
+  }
+
+  const handleClick = async () => {
+    try {
+      await mutateSendVerification(email)
     } catch (e) {
       console.log(e)
     }
@@ -97,10 +65,10 @@ export default function VerificationForm ({ email }: Props) {
         </CardDescription>
       </CardHeader>
       <CardContent className='flex justify-center'>
-        <Form {...formOTP}>
-          <form onSubmit={formOTP.handleSubmit(onSubmitOTPForm)}>
+        <Form {...formVerification}>
+          <form onSubmit={formVerification.handleSubmit(onSubmitOTPForm)}>
             <FormField
-              control={formOTP.control}
+              control={formVerification.control}
               name="verification_code"
               render={({ field }) => (
                 <FormItem>
@@ -123,21 +91,9 @@ export default function VerificationForm ({ email }: Props) {
                 </FormItem>
               )}
             />
-            <FormField
-              control={formOTP.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem className='hidden'>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
             <div className='pt-8'>
-              <Button type="submit" className='w-full' disabled={isPendingVerify}>
-                {!isPendingVerify ? 'Validar' : 'Validando...'}
+              <Button type="submit" className='w-full' disabled={isPendingVerification}>
+                {!isPendingVerification ? 'Validar' : 'Validando...'}
               </Button>
             </div>
           </form>
@@ -145,10 +101,10 @@ export default function VerificationForm ({ email }: Props) {
       </CardContent>
       <CardFooter className='flex justify-center'>
         <Button variant='link'
-          onClick={async () => await mutateVerificationCode(email)}
-          disabled={isPendingResend}
+          onClick={ handleClick }
+          disabled={isPendingSendVerification}
         >
-          {!isPendingResend ? 'Reenviar el codigo de verificación' : 'Reenviando...'}
+          {!isPendingSendVerification ? 'Reenviar el codigo de verificación' : 'Reenviando...'}
         </Button>
       </CardFooter>
     </Card>

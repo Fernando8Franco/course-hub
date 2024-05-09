@@ -23,15 +23,11 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Calendar } from '@/components/ui/calendar'
 import { type z } from 'zod'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useToast } from '@/components/ui/use-toast'
-import { useForm } from 'react-hook-form'
 import { cn } from '@/lib/utils'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
-import { useMutation } from '@tanstack/react-query'
-import { createUser } from '@/services/User'
-import { formUserSchema } from '@/formSchemas'
+import useRegisterForm from '@/hooks/forms/useRegisterForm'
+import useMutateRegister from '@/hooks/useMutateRegister'
 
 interface Props {
   setIsSubmited: (isSubmited: boolean) => void
@@ -39,37 +35,12 @@ interface Props {
 }
 
 export default function RegisterForm ({ setIsSubmited, setEmail }: Props) {
-  const { toast } = useToast()
-  const { mutateAsync: mutateUser, isPending } = useMutation({
-    mutationFn: createUser,
-    onSuccess: (data) => {
-      setIsSubmited(true)
-      setEmail(data.message)
-    },
-    onError: (error) => {
-      toast({
-        variant: 'destructive',
-        title: 'Oh no!',
-        description: error.message
-      })
-    }
-  })
+  const { formRegisterSchema, formRegister } = useRegisterForm()
+  const { mutateRegister, isPending } = useMutateRegister({ setIsSubmited, setEmail })
 
-  const formUser = useForm<z.infer<typeof formUserSchema>>({
-    resolver: zodResolver(formUserSchema),
-    defaultValues: {
-      name: '',
-      father_last_name: '',
-      mother_last_name: '',
-      phone_number: '',
-      email: '',
-      password: ''
-    }
-  })
-
-  async function onSubmitUserForm (formData: z.infer<typeof formUserSchema>) {
+  async function onSubmitUserForm (formData: z.infer<typeof formRegisterSchema>) {
     try {
-      await mutateUser(formData)
+      await mutateRegister(formData)
     } catch (e) {
       console.log(e)
     }
@@ -86,11 +57,11 @@ export default function RegisterForm ({ setIsSubmited, setEmail }: Props) {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <Form {...formUser}>
-          <form onSubmit={formUser.handleSubmit(onSubmitUserForm)}>
+        <Form {...formRegister}>
+          <form onSubmit={formRegister.handleSubmit(onSubmitUserForm)}>
             <div className="grid gap-1.5">
               <FormField
-                control={formUser.control}
+                control={formRegister.control}
                 name="name"
                 render={({ field }) => (
                   <FormItem>
@@ -104,7 +75,7 @@ export default function RegisterForm ({ setIsSubmited, setEmail }: Props) {
               />
               <div className="grid gap-1.5 grid-cols-1 sm:grid-cols-2">
                 <FormField
-                  control={formUser.control}
+                  control={formRegister.control}
                   name="father_last_name"
                   render={({ field }) => (
                     <FormItem>
@@ -117,7 +88,7 @@ export default function RegisterForm ({ setIsSubmited, setEmail }: Props) {
                   )}
                 />
                 <FormField
-                  control={formUser.control}
+                  control={formRegister.control}
                   name="mother_last_name"
                   render={({ field }) => (
                     <FormItem>
@@ -130,7 +101,7 @@ export default function RegisterForm ({ setIsSubmited, setEmail }: Props) {
                   )}
                 />
                 <FormField
-                  control={formUser.control}
+                  control={formRegister.control}
                   name="birthday"
                   render={({ field }) => (
                     <FormItem className="flex flex-col">
@@ -174,7 +145,7 @@ export default function RegisterForm ({ setIsSubmited, setEmail }: Props) {
                   )}
                 />
                 <FormField
-                  control={formUser.control}
+                  control={formRegister.control}
                   name="phone_number"
                   render={({ field }) => (
                     <FormItem>
@@ -187,7 +158,7 @@ export default function RegisterForm ({ setIsSubmited, setEmail }: Props) {
                   )}
                 />
                 <FormField
-                  control={formUser.control}
+                  control={formRegister.control}
                   name="email"
                   render={({ field }) => (
                     <FormItem>
@@ -200,7 +171,7 @@ export default function RegisterForm ({ setIsSubmited, setEmail }: Props) {
                   )}
                 />
                 <FormField
-                  control={formUser.control}
+                  control={formRegister.control}
                   name="password"
                   render={({ field }) => (
                     <FormItem>

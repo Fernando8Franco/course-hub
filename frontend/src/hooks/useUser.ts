@@ -2,11 +2,9 @@ import { useQuery } from '@tanstack/react-query'
 import { userInfo } from '@/services/User'
 import { useEffect } from 'react'
 import { toast } from '@/components/ui/use-toast'
-import { useNavigate } from 'react-router-dom'
 import Cookies from 'js-cookie'
 
 export const useUser = () => {
-  const navigate = useNavigate()
   const { data: user, isError, error, isLoading } = useQuery({
     queryKey: ['user'],
     queryFn: userInfo,
@@ -15,7 +13,7 @@ export const useUser = () => {
     staleTime: Infinity,
     retry: (failureCount, error) => {
       if (error.message === 'No token') return false
-      if (error.message === 'Expired token') return false
+      if (error.message === 'La sesión a caducado.') return false
       if (failureCount >= 3) return false
       return true
     }
@@ -24,20 +22,14 @@ export const useUser = () => {
   useEffect(() => {
     if (isError) {
       if (error.message === 'No token') return
-      if (error.message === 'Expired token') {
-        Cookies.remove('SJSWSTN')
-        toast({
-          title: 'Oh no!',
-          description: 'La sesión a caducado. Por favor vuelve a iniciar sesión'
-        })
-        navigate('/login')
-        return
-      }
       toast({
         variant: 'destructive',
-        title: 'Oh no!, Hubo un error al cargar los datos',
+        title: 'Oh no!',
         description: error.message
       })
+      if (error.message === 'Expired token') {
+        Cookies.remove('SJSWSTN')
+      }
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isError])

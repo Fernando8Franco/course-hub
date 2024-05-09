@@ -9,6 +9,8 @@ import UserPageSkeleton from './pages/Skeletons/UserPageSkeleton.tsx'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import './index.css'
+import AuthProvider from './components/react-components/AuthProvider.tsx'
+import ProtectedRoute from './components/react-components/ProtectedRoute.tsx'
 
 const NotFoundPage = lazy(async () => await import('./pages/NotFoundPage.tsx'))
 const Layout = lazy(async () => await import('./pages/Layouts/Layout.tsx'))
@@ -20,7 +22,7 @@ const RegisterPage = lazy(async () => await import('./pages/RegisterPage.tsx'))
 const SettingsLayout = lazy(async () => await import('./pages/Layouts/SettingsLayout.tsx'))
 const SettingsPage = lazy(async () => await import('./pages/SettingsPage.tsx'))
 const UpdatePasswordPage = lazy(async () => await import('./pages/UpdatePasswordPage.tsx'))
-const OrdersPage = lazy(async () => await import('./pages/OrderPage.tsx'))
+const OrdersPage = lazy(async () => await import('./pages/OrdersPage.tsx'))
 const PaymentPage = lazy(async () => await import('./pages/PaymentPage.tsx'))
 
 const router = createBrowserRouter(
@@ -44,7 +46,9 @@ const router = createBrowserRouter(
           path: '/login',
           element:
           <Suspense fallback={<Skeleton className='mx-auto my-auto w-[385px] h-[405px]' />}>
-            <LoginPage />
+              <ProtectedRoute>
+                <LoginPage />
+              </ProtectedRoute>
           </Suspense>
         },
         {
@@ -123,7 +127,9 @@ const queryClient = new QueryClient()
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <QueryClientProvider client={queryClient}>
     <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
-      <RouterProvider router={router}/>
+      <AuthProvider isLogIn={false}>
+        <RouterProvider router={router}/>
+      </AuthProvider>
     </ThemeProvider>
   </QueryClientProvider>
 )

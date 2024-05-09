@@ -16,67 +16,26 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { type z } from 'zod'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm } from 'react-hook-form'
-import { formUpdatePasswordSchema } from '@/formSchemas'
-import { useToast } from '@/components/ui/use-toast'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { updatePassword } from '@/services/User'
-import { useNavigate } from 'react-router-dom'
-import Cookies from 'js-cookie'
+import useUpdateCustomerPasswordForm from '@/hooks/forms/useUpdateCustomerPasswordForm'
+import useMutateUpdateCustomerPassword from '@/hooks/useMutateUpdateCustomerPassword'
+import { useEffect } from 'react'
 
 export default function UpdatePasswordPage () {
-  const { toast } = useToast()
-  const queryClient = useQueryClient()
-  const navigate = useNavigate()
-  const formUpdatePassword = useForm<z.infer<typeof formUpdatePasswordSchema>>({
-    resolver: zodResolver(formUpdatePasswordSchema),
-    defaultValues: {
-      password: '',
-      new_password: ''
-    }
-  })
-  const { mutateAsync: mutateAuth, isPending } = useMutation({
-    mutationFn: updatePassword,
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['user'] })
-      toast({
-        title: 'La contraseña fue actualizada correctamente.'
-      })
-      formUpdatePassword.reset()
-    },
-    onError: (error) => {
-      if (error.message === 'Wrong Password') {
-        toast({
-          title: 'Oh no!',
-          description: 'Contraseña incorrecta.'
-        })
-        return
-      }
-      if (error.message === 'Expired token') {
-        Cookies.remove('SJSWSTN')
-        toast({
-          title: 'Oh no!',
-          description: 'La sesión a caducado. Por favor vuelve a iniciar sesión.'
-        })
-        navigate('/login')
-        return
-      }
-      toast({
-        variant: 'destructive',
-        title: 'Oh no!',
-        description: error.message
-      })
-    }
-  })
+  const { formUpdateCustomerPasswordSchema, formUpdateCustomerPassword, handleReset } = useUpdateCustomerPasswordForm()
+  const { mutateUpdateCustomerPassword, isPending, isSuccess } = useMutateUpdateCustomerPassword()
 
-  async function onSubmitOTPForm (formData: z.infer<typeof formUpdatePasswordSchema>) {
+  async function onSubmitOTPForm (formData: z.infer<typeof formUpdateCustomerPasswordSchema>) {
     try {
-      await mutateAuth(formData)
+      await mutateUpdateCustomerPassword(formData)
     } catch (e) {
       console.log(e)
     }
   }
+
+  useEffect(() => {
+    if (isSuccess) handleReset()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isSuccess])
 
   return (
     <Card>
@@ -90,10 +49,10 @@ export default function UpdatePasswordPage () {
       </CardHeader>
       <CardContent className='mx-auto my-auto max-w-sm'>
         <div>
-          <Form {...formUpdatePassword}>
-            <form onSubmit={formUpdatePassword.handleSubmit(onSubmitOTPForm)}>
+          <Form {...formUpdateCustomerPassword}>
+            <form onSubmit={formUpdateCustomerPassword.handleSubmit(onSubmitOTPForm)}>
               <FormField
-                control={formUpdatePassword.control}
+                control={formUpdateCustomerPassword.control}
                 name="password"
                 render={({ field }) => (
                   <FormItem>
@@ -106,7 +65,7 @@ export default function UpdatePasswordPage () {
                 )}
               />
               <FormField
-                control={formUpdatePassword.control}
+                control={formUpdateCustomerPassword.control}
                 name="new_password"
                 render={({ field }) => (
                   <FormItem>

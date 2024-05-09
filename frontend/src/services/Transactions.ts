@@ -14,13 +14,15 @@ export async function postTransaction (courseId: { course_id: number }): Promise
   const response = await fetch(import.meta.env.VITE_BACKEND_HOST + 'transaction', requestOptions)
   if (!response.ok) {
     const error = await response.json() as Response
-    throw new Error(error.message)
+    let errorMessage = 'Hubo un problema con la solicitud.'
+    if (error.message === 'Expired token') errorMessage = 'La sesión a caducado.'
+    throw new Error(errorMessage)
   }
 
   return await response.json()
 }
 
-export async function postImage (data: UserTransactionImage): Promise<Response> {
+export async function postImageTransaction (data: UserTransactionImage): Promise<Response> {
   const formData = new FormData()
   const imageFile = (data.image === undefined) ? '' : data.image[0]
   formData.append('transaction_id', data.transaction_id)
@@ -37,7 +39,9 @@ export async function postImage (data: UserTransactionImage): Promise<Response> 
   const response = await fetch(import.meta.env.VITE_BACKEND_HOST + 'transaction-image', requestOptions)
   if (!response.ok) {
     const error = await response.json() as Response
-    throw new Error(error.message)
+    let errorMessage = 'Hubo un problema con la solicitud.'
+    if (error.message === 'Expired token') errorMessage = 'La sesión a caducado.'
+    throw new Error(errorMessage)
   }
 
   return await response.json()

@@ -173,7 +173,7 @@ class UserService {
         $result = UserRepository::getResetInfo($token);
         
         if (is_null($result) || strtotime($result['reset_token_expires_at']) <= time())
-            Flight::halt(400, json_encode(['status' => 'error', 'message' => 'Token expired']));
+            Flight::halt(400, json_encode(['status' => 'error', 'message' => 'Expired token']));
 
         $enc_password = password_hash($password, PASSWORD_DEFAULT);
         UserRepository::updateResetPassword($enc_password, $result['id']);

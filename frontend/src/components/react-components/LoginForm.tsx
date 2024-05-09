@@ -17,7 +17,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { type z } from 'zod'
 import { Link, useNavigate } from 'react-router-dom'
-import useLoginForm from '@/hooks/useLoginForm'
+import useLoginForm from '@/hooks/forms/useLoginForm'
 import useMutateLogin from '@/hooks/useMutateLogin'
 
 export function LoginForm () {

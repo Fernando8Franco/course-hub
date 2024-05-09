@@ -4,6 +4,7 @@ import { postTransaction } from '@/services/Transactions'
 import { useNavigate } from 'react-router-dom'
 import useCartStore from '@/store/cartStore'
 import { useUser } from './useUser'
+import Cookies from 'js-cookie'
 
 export const useMutateTransaction = () => {
   const { toast } = useToast()
@@ -32,6 +33,10 @@ export const useMutateTransaction = () => {
         title: 'Oh no!',
         description: error.message
       })
+      if (error.message === 'La sesión a caducado.') {
+        Cookies.remove('SJSWSTN')
+        navigate('/login')
+      }
     }
   })
 

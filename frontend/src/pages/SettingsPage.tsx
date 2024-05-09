@@ -23,84 +23,24 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Calendar } from '@/components/ui/calendar'
-import { useToast } from '@/components/ui/use-toast'
 import { type z } from 'zod'
-import { zodResolver } from '@hookform/resolvers/zod'
 import { cn } from '@/lib/utils'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
-import { useUser } from '@/hooks/useUser'
-import { useForm } from 'react-hook-form'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { updateCostumer } from '@/services/User'
-import { formUpdateCustomerSchema } from '@/formSchemas'
 import { Separator } from '@/components/ui/separator'
-import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import Cookies from 'js-cookie'
+import useUpdateCustomerForm from '@/hooks/forms/useUpdateCustomerForm'
+import useMutateUpdateCustomer from '@/hooks/useMutateUpdateCustomer'
 
 export default function SettingsPage () {
-  const { toast } = useToast()
-  const [isDisable, setIsDisable] = useState(true)
-  const { user, isLoading } = useUser()
-  const navigate = useNavigate()
-  const queryClient = useQueryClient()
+  const { formUpdateCustomerSchema, formUpdateCustomer } = useUpdateCustomerForm()
+  const { isDisable, handleCheckedChange, mutateUpdateCustomer, isPending } = useMutateUpdateCustomer()
 
-  const { mutateAsync: updateUser, isPending } = useMutation({
-    mutationFn: updateCostumer,
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['user'] })
-      toast({
-        title: 'Los datos fueron actualizados correctamente.'
-      })
-      setIsDisable(true)
-    },
-    onError: (error) => {
-      if (error.message === 'Expired token') {
-        Cookies.remove('SJSWSTN')
-        toast({
-          title: 'Oh no!',
-          description: 'La sesión a caducado. Por favor vuelve a iniciar sesión'
-        })
-        navigate('/login')
-        return
-      }
-      toast({
-        variant: 'destructive',
-        title: 'Oh no!',
-        description: error.message
-      })
-    }
-  })
-
-  const formUpdateUser = useForm<z.infer<typeof formUpdateCustomerSchema>>({
-    mode: 'onChange',
-    resolver: zodResolver(formUpdateCustomerSchema),
-    defaultValues: {
-      name: '',
-      father_last_name: '',
-      mother_last_name: '',
-      phone_number: '',
-      email: ''
-    }
-  })
-
-  useEffect(() => {
-    if (!isLoading && (user != null)) {
-      formUpdateUser.reset(user)
-    }
-  }, [user, isLoading, formUpdateUser])
-
-  async function onSubmitUserForm (formData: z.infer<typeof formUpdateCustomerSchema>) {
+  async function onSubmitUserForm (data: z.infer<typeof formUpdateCustomerSchema>) {
     try {
-      await updateUser(formData)
+      await mutateUpdateCustomer(data)
     } catch (e) {
       console.log(e)
     }
-  }
-
-  function handleCheckedChange (e: boolean) {
-    setIsDisable(!e)
   }
 
   return (
@@ -124,11 +64,11 @@ export default function SettingsPage () {
               Modificar los datos
             </label>
           </div>
-          <Form {...formUpdateUser}>
-            <form onSubmit={formUpdateUser.handleSubmit(onSubmitUserForm)}>
+          <Form {...formUpdateCustomer}>
+            <form onSubmit={formUpdateCustomer.handleSubmit(onSubmitUserForm)}>
               <div className="grid gap-1.5 grid-cols-1 sm:grid-cols-3">
                 <FormField
-                  control={formUpdateUser.control}
+                  control={formUpdateCustomer.control}
                   name="name"
                   render={({ field }) => (
                     <FormItem>
@@ -141,7 +81,7 @@ export default function SettingsPage () {
                   )}
                 />
                 <FormField
-                  control={formUpdateUser.control}
+                  control={formUpdateCustomer.control}
                   name="father_last_name"
                   render={({ field }) => (
                     <FormItem>
@@ -154,7 +94,7 @@ export default function SettingsPage () {
                   )}
                 />
                 <FormField
-                  control={formUpdateUser.control}
+                  control={formUpdateCustomer.control}
                   name="mother_last_name"
                   render={({ field }) => (
                     <FormItem>
@@ -167,7 +107,7 @@ export default function SettingsPage () {
                   )}
                 />
                 <FormField
-                  control={formUpdateUser.control}
+                  control={formUpdateCustomer.control}
                   name="birthday"
                   render={({ field }) => (
                     <FormItem className="flex flex-col">
@@ -212,7 +152,7 @@ export default function SettingsPage () {
                   )}
                 />
                 <FormField
-                  control={formUpdateUser.control}
+                  control={formUpdateCustomer.control}
                   name="phone_number"
                   render={({ field }) => (
                     <FormItem>
@@ -225,7 +165,7 @@ export default function SettingsPage () {
                   )}
                 />
                 <FormField
-                  control={formUpdateUser.control}
+                  control={formUpdateCustomer.control}
                   name="email"
                   render={({ field }) => (
                     <FormItem>

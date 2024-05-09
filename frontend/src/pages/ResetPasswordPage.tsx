@@ -15,7 +15,7 @@ import {
   CardTitle
 } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import useResetPasswordForm from '@/hooks/useResetPasswordForm'
+import useResetPasswordForm from '@/hooks/forms/useResetPasswordForm'
 import { useParams } from 'react-router-dom'
 import { type z } from 'zod'
 import useResetPassword from '@/hooks/useResetPassword'

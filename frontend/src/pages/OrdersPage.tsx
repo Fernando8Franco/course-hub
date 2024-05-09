@@ -6,7 +6,7 @@ import {
   CardTitle
 } from '@/components/ui/card'
 import { DataTable } from '@/components/react-components/DataTable'
-import { columnsCustomerTransaction } from '@/components/datatable-columns/columns-customer-transaction'
+import { ColumnsCustomerTransactions } from '@/components/datatable-columns/ColumnsCustomerTransactions'
 import { useUser } from '@/hooks/useUser'
 
 export default function OrdersPage () {
@@ -23,7 +23,7 @@ export default function OrdersPage () {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <DataTable columns={columnsCustomerTransaction} data={user?.transactions} message='No tienes pedidos.'/>
+        <DataTable columns={ColumnsCustomerTransactions} data={user?.transactions} message='No tienes pedidos.'/>
       </CardContent>
     </Card>
   )

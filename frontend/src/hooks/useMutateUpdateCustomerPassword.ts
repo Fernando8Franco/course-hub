@@ -1,23 +1,22 @@
 import { useToast } from '@/components/ui/use-toast'
-import { login } from '@/services/User'
+import { updatePassword } from '@/services/User'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import Cookies from 'js-cookie'
 import { useNavigate } from 'react-router-dom'
 
-export default function useMutateLogin () {
+export default function useMutateUpdateCustomerPassword () {
   const { toast } = useToast()
   const queryClient = useQueryClient()
   const navigate = useNavigate()
-  const { mutateAsync: mutateLogin, isPending: isPendingLogin } = useMutation({
-    mutationFn: login,
-    onSuccess: (data) => {
-      Cookies.set('SJSWSTN', data.message)
+
+  const { mutateAsync: mutateUpdateCustomerPassword, isPending, isSuccess } = useMutation({
+    mutationFn: updatePassword,
+    onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['user'] })
       toast({
         variant: 'success',
-        title: 'Sesión iniciada correctamente'
+        title: 'La contraseña fue actualizada correctamente.'
       })
-      navigate('/')
     },
     onError: (error) => {
       toast({
@@ -25,8 +24,12 @@ export default function useMutateLogin () {
         title: 'Oh no!',
         description: error.message
       })
+      if (error.message === 'La sesión a caducado.') {
+        Cookies.remove('SJSWSTN')
+        navigate('/login')
+      }
     }
   })
 
-  return ({ mutateLogin, isPendingLogin })
+  return ({ mutateUpdateCustomerPassword, isPending, isSuccess })
 }

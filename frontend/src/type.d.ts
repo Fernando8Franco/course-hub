@@ -49,6 +49,7 @@ export interface UserSession {
   mother_last_name: string
   phone_number: string
   email: string
+  user_type: string
   transactions: CostumerTransaction[]
 }
 

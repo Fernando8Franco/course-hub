@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { type z } from 'zod'
-import useSendResetForm from '@/hooks/useSendResetForm'
+import useSendResetForm from '@/hooks/forms/useSendResetForm'
 import useSendReset from '@/hooks/useSendReset'
 
 export default function SendResetPage () {

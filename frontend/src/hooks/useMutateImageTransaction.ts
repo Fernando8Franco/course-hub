@@ -1,23 +1,22 @@
 import { useToast } from '@/components/ui/use-toast'
-import { login } from '@/services/User'
+import { postImageTransaction } from '@/services/Transactions'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import Cookies from 'js-cookie'
 import { useNavigate } from 'react-router-dom'
+import Cookies from 'js-cookie'
 
-export default function useMutateLogin () {
+export default function useMutateImageTransaction () {
   const { toast } = useToast()
   const queryClient = useQueryClient()
   const navigate = useNavigate()
-  const { mutateAsync: mutateLogin, isPending: isPendingLogin } = useMutation({
-    mutationFn: login,
-    onSuccess: (data) => {
-      Cookies.set('SJSWSTN', data.message)
+
+  const { mutateAsync: mutateTransaction, isPending } = useMutation({
+    mutationFn: postImageTransaction,
+    onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['user'] })
       toast({
         variant: 'success',
-        title: 'Sesión iniciada correctamente'
+        title: 'Recibo enviado correctamente'
       })
-      navigate('/')
     },
     onError: (error) => {
       toast({
@@ -25,8 +24,12 @@ export default function useMutateLogin () {
         title: 'Oh no!',
         description: error.message
       })
+      if (error.message === 'La sesión a caducado.') {
+        Cookies.remove('SJSWSTN')
+        navigate('/login')
+      }
     }
   })
 
-  return ({ mutateLogin, isPendingLogin })
+  return ({ mutateTransaction, isPending })
 }
