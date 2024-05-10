@@ -138,6 +138,7 @@ export async function userInfo (): Promise<UserSession> {
     const error = await response.json() as Response
     let errorMessage = 'Hubo un problema con la solicitud.'
     if (error.message === 'Expired token') errorMessage = 'La sesión a caducado.'
+    if (error.message === 'Wrong number of segments') errorMessage = 'Token no valido.'
     throw new Error(errorMessage)
   }
   const data = await response.json()

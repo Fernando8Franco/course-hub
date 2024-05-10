@@ -45,12 +45,12 @@ export default function useUpdateCustomerForm () {
     mode: 'onChange',
     resolver: zodResolver(formUpdateCustomerSchema),
     defaultValues: {
-      name: user?.name,
-      father_last_name: user?.father_last_name,
-      mother_last_name: user?.mother_last_name,
-      phone_number: user?.phone_number,
+      name: '',
+      father_last_name: '',
+      mother_last_name: '',
+      phone_number: '',
       birthday: user?.birthday,
-      email: user?.email
+      email: ''
     }
   })
 

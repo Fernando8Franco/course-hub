@@ -17,7 +17,7 @@ export default function useMutateLogin () {
         variant: 'success',
         title: 'Sesión iniciada correctamente'
       })
-      navigate('/')
+      navigate('/', { replace: true })
     },
     onError: (error) => {
       toast({
