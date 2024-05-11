@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom'
 
 export const useUser = () => {
   const navigate = useNavigate()
-  const { data: user, isError, error, isLoading } = useQuery({
+  const { data: user, isError, error, isLoading, isSuccess } = useQuery({
     queryKey: ['user'],
     queryFn: userInfo,
     refetchOnMount: false,
@@ -40,5 +40,5 @@ export const useUser = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isError])
 
-  return { user, isLoading }
+  return { user, isLoading, isSuccess }
 }

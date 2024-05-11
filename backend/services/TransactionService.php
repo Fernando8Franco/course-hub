@@ -117,7 +117,7 @@ class TransactionService {
 
         TransactionRepository::update($id, $state);
     
-        Flight::halt(200, json_encode(['status' => 'success', 'message' => 'Transaction updated correctly']));
+        Flight::halt(200, json_encode(['status' => 'success', 'message' => $state]));
     }
 
     function delete($id) {

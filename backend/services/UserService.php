@@ -50,9 +50,9 @@ class UserService {
             Flight::error($e);
         }
         
-        $token = $this->getToken($email, $password);
+        $result = $this->getToken($email, $password);
     
-        Flight::halt(200, json_encode(['status' => 'success', 'message' => $token]));
+        Flight::halt(200, json_encode(['status' => $result['user_type'], 'message' => $result['token']]));
     }
 
     function create($user_type) {
@@ -262,7 +262,7 @@ class UserService {
         
         $token = encodeToken($result['id'], $result['user_type']);
 
-        return $token;
+        return ['token' => $token, 'user_type' => $result['user_type']];
     }
 
     private function validateUserType($user_type) {

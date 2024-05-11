@@ -1,5 +1,67 @@
-import { type UserTransactionImage, type Response } from '@/type'
+import { type UserTransactionImage, type Response, type Transaction } from '@/type'
 import Cookies from 'js-cookie'
+
+export async function getPendingTransactions (): Promise<Transaction[]> {
+  if (Cookies.get('SJASWDSTMN') === undefined) throw new Error('No token')
+  const requestOptions = {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${Cookies.get('SJASWDSTMN')}`
+    }
+  }
+
+  const response = await fetch(import.meta.env.VITE_BACKEND_HOST + 'transactions-pending-with-image', requestOptions)
+  if (!response.ok) {
+    const error = await response.json() as Response
+    let errorMessage = 'Hubo un problema con la solicitud.'
+    if (error.message === 'Expired token') errorMessage = 'La sesión a caducado.'
+    throw new Error(errorMessage)
+  }
+
+  return await response.json()
+}
+
+export async function getTransactions (status: string): Promise<Transaction[]> {
+  if (Cookies.get('SJASWDSTMN') === undefined) throw new Error('No token')
+  const requestOptions = {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${Cookies.get('SJASWDSTMN')}`
+    }
+  }
+
+  const response = await fetch(import.meta.env.VITE_BACKEND_HOST + 'transactions/' + status, requestOptions)
+  if (!response.ok) {
+    const error = await response.json() as Response
+    let errorMessage = 'Hubo un problema con la solicitud.'
+    if (error.message === 'Expired token') errorMessage = 'La sesión a caducado.'
+    throw new Error(errorMessage)
+  }
+
+  return await response.json()
+}
+
+export async function updateTransactionState (data: { transactionId: string, status: number }): Promise<Response> {
+  const requestOptions = {
+    method: 'PUT',
+    headers: {
+      Authorization: `Bearer ${Cookies.get('SJASWDSTMN')}`
+    }
+  }
+
+  const response = await fetch(`${import.meta.env.VITE_BACKEND_HOST}transaction/${data.transactionId}/${data.status}`, requestOptions)
+  if (!response.ok) {
+    const error = await response.json() as Response
+    let errorMessage = 'Hubo un problema con la solicitud.'
+    if (error.message === 'Expired token') errorMessage = 'La sesión a caducado.'
+    throw new Error(errorMessage)
+  }
+
+  const apiResponse = await response.json()
+  return apiResponse
+}
 
 export async function postTransaction (courseId: { course_id: number }): Promise<Response> {
   const requestOptions = {

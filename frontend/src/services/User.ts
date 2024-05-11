@@ -126,11 +126,11 @@ export async function sendResetPassword (data: { token: string | undefined, pass
 }
 
 export async function userInfo (): Promise<UserSession> {
-  if (Cookies.get('SJSWSTN') === undefined) throw new Error('No token')
+  if (Cookies.get('SJSWSTN') === undefined && Cookies.get('SJASWDSTMN') === undefined) throw new Error('No token')
   const requestOptions = {
     method: 'GET',
     headers: {
-      Authorization: `Bearer ${Cookies.get('SJSWSTN')}`
+      Authorization: `Bearer ${Cookies.get('SJSWSTN') !== undefined ? Cookies.get('SJSWSTN') : Cookies.get('SJASWDSTMN')}`
     }
   }
   const response = await fetch(import.meta.env.VITE_BACKEND_HOST + 'user', requestOptions)

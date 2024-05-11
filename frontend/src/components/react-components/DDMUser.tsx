@@ -24,44 +24,64 @@ export default function DDMUser () {
         </Button>
       </DropdownMenuTrigger>
       {
-        user !== undefined
-          ? <DropdownMenuContent align="end">
-              <DropdownMenuLabel>{user.name}</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <Link to='/user/settings'>
-                <DropdownMenuItem className='cursor-pointer'>Ajustes</DropdownMenuItem>
-              </Link>
-              <Link to='/user/orders'>
-                <DropdownMenuItem className='cursor-pointer'>Pedidos</DropdownMenuItem>
-              </Link>
-              <Link to='/user/payment'>
-                <DropdownMenuItem className='cursor-pointer'>Formas de pago</DropdownMenuItem>
-              </Link>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem className='cursor-pointer'
-              onClick={() => {
-                Cookies.remove('SJSWSTN')
-                navigate('/')
-                window.location.reload()
-              }}>
-                Cerrar sesión
+        (user === undefined) &&
+          <DropdownMenuContent align="end">
+            <Link to='/login'>
+              <DropdownMenuItem className='flex gap-2 justify-between cursor-pointer'>
+                Iniciar sesión
+                <LogIn className="h-5 w-5" />
               </DropdownMenuItem>
-            </DropdownMenuContent>
-          : <DropdownMenuContent align="end">
-              <Link to='/login'>
-                <DropdownMenuItem className='flex gap-2 justify-between cursor-pointer'>
-                  Iniciar sesión
-                  <LogIn className="h-5 w-5" />
-                </DropdownMenuItem>
-              </Link>
-              <DropdownMenuSeparator/>
-              <Link to='/register'>
-                <DropdownMenuItem className='flex justify-between cursor-pointer'>
-                  Registrarse
-                  <UserRoundPlus className="h-5 w-5" />
-                </DropdownMenuItem>
-              </Link>
-            </DropdownMenuContent>
+            </Link>
+            <DropdownMenuSeparator/>
+            <Link to='/register'>
+              <DropdownMenuItem className='flex justify-between cursor-pointer'>
+                Registrarse
+                <UserRoundPlus className="h-5 w-5" />
+              </DropdownMenuItem>
+            </Link>
+          </DropdownMenuContent>
+      }
+      {
+        (user !== undefined && user.user_type === 'CUSTOMER') &&
+          <DropdownMenuContent align="end">
+            <DropdownMenuLabel>{user.name}</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <Link to='/user/settings'>
+              <DropdownMenuItem className='cursor-pointer'>Ajustes</DropdownMenuItem>
+            </Link>
+            <Link to='/user/orders'>
+              <DropdownMenuItem className='cursor-pointer'>Pedidos</DropdownMenuItem>
+            </Link>
+            <Link to='/user/payment'>
+              <DropdownMenuItem className='cursor-pointer'>Formas de pago</DropdownMenuItem>
+            </Link>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem className='cursor-pointer'
+            onClick={() => {
+              Cookies.remove('SJSWSTN')
+              Cookies.remove('SJASWDSTMN')
+              navigate('/')
+              window.location.reload()
+            }}>
+              Cerrar sesión
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+      }
+      {
+        (user !== undefined && user.user_type === 'ADMIN') &&
+          <DropdownMenuContent align="end">
+            <DropdownMenuLabel>{user.name}</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem className='cursor-pointer'
+            onClick={() => {
+              Cookies.remove('SJSWSTN')
+              Cookies.remove('SJASWDSTMN')
+              navigate('/')
+              window.location.reload()
+            }}>
+              Cerrar sesión
+            </DropdownMenuItem>
+          </DropdownMenuContent>
       }
     </DropdownMenu>
   )

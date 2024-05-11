@@ -11,13 +11,24 @@ export default function useMutateLogin () {
   const { mutateAsync: mutateLogin, isPending: isPendingLogin } = useMutation({
     mutationFn: login,
     onSuccess: (data) => {
-      Cookies.set('SJSWSTN', data.message)
-      void queryClient.invalidateQueries({ queryKey: ['user'] })
-      toast({
-        variant: 'success',
-        title: 'Sesión iniciada correctamente'
-      })
-      navigate('/', { replace: true })
+      if (data.status === 'CUSTOMER') {
+        Cookies.set('SJSWSTN', data.message)
+        void queryClient.invalidateQueries({ queryKey: ['user'] })
+        toast({
+          variant: 'success',
+          title: 'Sesión iniciada correctamente'
+        })
+        navigate('/', { replace: true })
+      }
+      if (data.status === 'ADMIN') {
+        Cookies.set('SJASWDSTMN', data.message)
+        void queryClient.invalidateQueries({ queryKey: ['user'] })
+        toast({
+          variant: 'success',
+          title: 'Sesión iniciada correctamente'
+        })
+        navigate('/admin/dashboard', { replace: true })
+      }
     },
     onError: (error) => {
       toast({

@@ -9,7 +9,9 @@ import UserPageSkeleton from './pages/Skeletons/UserPageSkeleton.tsx'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import './index.css'
-import ProtectedRoute from './components/ProtectedRoute'
+import ProtectedRouteCustomer from './components/ProtectedRouteCustomer.tsx'
+import ProtectedRouteAdmin from './components/ProtectedRouteAdmin.tsx'
+import { TooltipProvider } from './components/ui/tooltip.tsx'
 
 const NotFoundPage = lazy(async () => await import('./pages/NotFoundPage.tsx'))
 const Layout = lazy(async () => await import('./pages/Layouts/Layout.tsx'))
@@ -23,6 +25,10 @@ const SettingsPage = lazy(async () => await import('./pages/SettingsPage.tsx'))
 const UpdatePasswordPage = lazy(async () => await import('./pages/UpdatePasswordPage.tsx'))
 const OrdersPage = lazy(async () => await import('./pages/OrdersPage.tsx'))
 const PaymentPage = lazy(async () => await import('./pages/PaymentPage.tsx'))
+
+const LayoutAdminPage = lazy(async () => await import('./pages/AdminPages/LayoutAdminPage.tsx'))
+const DashboardPage = lazy(async () => await import('./pages/AdminPages/DashboardPage.tsx'))
+const TransactionsPage = lazy(async () => await import('./pages/AdminPages/TransactionsPage.tsx'))
 
 const router = createBrowserRouter(
   [
@@ -74,7 +80,7 @@ const router = createBrowserRouter(
           element: <TestPage />
         },
         {
-          element: <ProtectedRoute/>,
+          element: <ProtectedRouteCustomer/>,
           children: [
             {
               path: '/user',
@@ -112,6 +118,48 @@ const router = createBrowserRouter(
                   </Suspense>
                 }
               ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      element: <ProtectedRouteAdmin/>,
+      children: [
+        {
+          path: '/admin/dashboard',
+          element:
+            <Suspense>
+              <TooltipProvider>
+                <LayoutAdminPage/>
+              </TooltipProvider>
+            </Suspense>,
+          children: [
+            {
+              path: '/admin/dashboard',
+              element:
+                <Suspense>
+                  <DashboardPage/>
+                </Suspense>
+            },
+            {
+              path: '/admin/dashboard/transactions',
+              element:
+                <Suspense>
+                  <TransactionsPage/>
+                </Suspense>
+            },
+            {
+              path: '/admin/dashboard/users',
+              element: <h1>xdxd</h1>
+            },
+            {
+              path: '/admin/dashboard/courses',
+              element: <h1>Trnas</h1>
+            },
+            {
+              path: '/admin/dashboard/schools',
+              element: <h1>Trnas</h1>
             }
           ]
         }

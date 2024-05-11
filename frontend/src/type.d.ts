@@ -93,5 +93,22 @@ export interface UserTransactionImage {
 
 export interface StatusVariant {
   name: string
-  variant: 'default' | 'destructive' | 'success' | 'outline' | 'secondary' | null | undefined
+  variant: 'default' | 'destructive' | 'success' | 'outline' | 'secondary' | null | undefined | 'warning'
+}
+
+export interface Transaction {
+  transaction_id: string
+  date_purchase: Date
+  total_amount: string
+  transaction_state: string
+  image: string
+  user_id: string
+  name: string
+  father_last_name: string
+  mother_last_name: string
+  email: string
+  phone_number: string
+  course_id: number
+  course_name: string
+  course_is_active: number
 }

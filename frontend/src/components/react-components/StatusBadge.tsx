@@ -13,7 +13,7 @@ interface Props {
 
 export default function StatusBadge ({ transactionState }: Props) {
   let status: StatusVariant = { name: 'Pendiente', variant: 'default' }
-  if (transactionState === Status.PENDING) status = { name: 'Pendiente', variant: 'outline' }
+  if (transactionState === Status.PENDING) status = { name: 'Pendiente', variant: 'warning' }
   if (transactionState === Status.COMPLETED) status = { name: 'Completada', variant: 'success' }
   if (transactionState === Status.CANCELED) status = { name: 'Cancelada', variant: 'destructive' }
 
