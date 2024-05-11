@@ -32,7 +32,7 @@ export async function getTransactions (status: string): Promise<Transaction[]> {
     }
   }
 
-  const response = await fetch(import.meta.env.VITE_BACKEND_HOST + 'transactions/' + status, requestOptions)
+  const response = await fetch(`${import.meta.env.VITE_BACKEND_HOST}transactions/${status}`, requestOptions)
   if (!response.ok) {
     const error = await response.json() as Response
     let errorMessage = 'Hubo un problema con la solicitud.'
@@ -52,6 +52,26 @@ export async function updateTransactionState (data: { transactionId: string, sta
   }
 
   const response = await fetch(`${import.meta.env.VITE_BACKEND_HOST}transaction/${data.transactionId}/${data.status}`, requestOptions)
+  if (!response.ok) {
+    const error = await response.json() as Response
+    let errorMessage = 'Hubo un problema con la solicitud.'
+    if (error.message === 'Expired token') errorMessage = 'La sesión a caducado.'
+    throw new Error(errorMessage)
+  }
+
+  const apiResponse = await response.json()
+  return apiResponse
+}
+
+export async function deleteTransaction (transactionId: string): Promise<Response> {
+  const requestOptions = {
+    method: 'DELETE',
+    headers: {
+      Authorization: `Bearer ${Cookies.get('SJASWDSTMN')}`
+    }
+  }
+
+  const response = await fetch(`${import.meta.env.VITE_BACKEND_HOST}transaction/${transactionId}`, requestOptions)
   if (!response.ok) {
     const error = await response.json() as Response
     let errorMessage = 'Hubo un problema con la solicitud.'

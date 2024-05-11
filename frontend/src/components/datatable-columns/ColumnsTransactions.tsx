@@ -1,3 +1,4 @@
+import { ArrowUpDown } from 'lucide-react'
 import { type ColumnDef } from '@tanstack/react-table'
 import { type Transaction } from '@/type'
 import { format } from 'date-fns'
@@ -5,10 +6,22 @@ import { es } from 'date-fns/locale'
 import StatusBadge from '../react-components/StatusBadge'
 import CheckImage from '../react-components/CheckImage'
 import { Badge } from '../ui/badge'
+import { Button } from '../ui/button'
+import DeleteDialog from '../react-components/DeleteDialog'
 
 export const ColumnsTransactions: Array<ColumnDef<Transaction>> = [
   {
-    header: () => <div className="text-left">Datos transacción</div>,
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => { column.toggleSorting(column.getIsSorted() === 'asc') }}
+        >
+          Datos transacción
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      )
+    },
     accessorKey: 'date_purchase',
     cell: ({ row }) => {
       const date: Date = row.getValue('date_purchase')
@@ -37,6 +50,14 @@ export const ColumnsTransactions: Array<ColumnDef<Transaction>> = [
     accessorKey: 'image',
     cell: ({ row }) => {
       const image: string = row.getValue('image')
+
+      if (image === null) {
+        return (
+        <div className='text-center'>
+          <Badge variant='destructive'>Sin recibo</Badge>
+        </div>
+        )
+      }
 
       return <CheckImage image={image} />
     }
@@ -92,7 +113,9 @@ export const ColumnsTransactions: Array<ColumnDef<Transaction>> = [
     cell: ({ row }) => {
       const transaction = row.original
       return (
-        <h1>Hola</h1>
+        <DeleteDialog
+        transactionId={transaction.transaction_id}
+        />
       )
     }
   }

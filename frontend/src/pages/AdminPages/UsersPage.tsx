@@ -16,14 +16,14 @@ import {
 } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { DataTable } from '@/components/react-components/DataTable'
-import { useTransactions } from '@/hooks/useTransactions'
-import { ColumnsTransactions } from '@/components/datatable-columns/ColumnsTransactions'
+import { useUsers } from '@/hooks/useUsers'
+import { ColumnsUsers } from '@/components/datatable-columns/ColumnsUsers'
 
-export default function TransactionsPage () {
-  const { transactions, filter, setFilter, isSuccess } = useTransactions()
+export default function UsersPage () {
+  const { usersAdmin, userType, setUserType, isSuccess } = useUsers()
 
   const handleFilterChange = (filter: string) => {
-    setFilter(filter)
+    setUserType(filter)
   }
 
   return (
@@ -31,10 +31,10 @@ export default function TransactionsPage () {
       <Card className="overflow-x-auto">
         <CardHeader>
           <CardTitle className="text-2xl">
-            Transacciones
+            Usuarios
           </CardTitle>
           <CardDescription>
-            Tabla de todas las transacciones
+            Tabla de todos los usuarios
           </CardDescription>
           <div className="mx-auto flex items-center justify-end w-full gap-2">
             <DropdownMenu>
@@ -42,7 +42,7 @@ export default function TransactionsPage () {
                 <Button variant="outline" size="sm" className="h-8 gap-1">
                   <ListFilter className="h-3.5 w-3.5" />
                   <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                    Estado
+                    Tipo de Usuario
                   </span>
                 </Button>
               </DropdownMenuTrigger>
@@ -50,39 +50,25 @@ export default function TransactionsPage () {
                 <DropdownMenuLabel className='text-center'>Filtrar por estado</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuCheckboxItem
-                    checked={filter === ''}
-                    onSelect={() => { handleFilterChange('') }}
+                    checked={userType === 'customer'}
+                    onSelect={() => { handleFilterChange('customer') }}
                     className='text-center'
                   >
-                    Todas
+                    Cliente
                 </DropdownMenuCheckboxItem>
                 <DropdownMenuCheckboxItem
-                    checked={filter === '1'}
-                    onSelect={() => { handleFilterChange('1') }}
+                    checked={userType === 'admin'}
+                    onSelect={() => { handleFilterChange('admin') }}
                     className='text-center'
                   >
-                    Pendientes
-                </DropdownMenuCheckboxItem>
-                <DropdownMenuCheckboxItem
-                    checked={filter === '2'}
-                    onSelect={() => { handleFilterChange('2') }}
-                    className='text-center'
-                  >
-                    Completadas
-                </DropdownMenuCheckboxItem>
-                <DropdownMenuCheckboxItem
-                    checked={filter === '3'}
-                    onSelect={() => { handleFilterChange('3') }}
-                    className='text-center'
-                  >
-                    Canceladas
+                    Administrador
                 </DropdownMenuCheckboxItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
         </CardHeader>
         <CardContent>
-          <DataTable columns={ColumnsTransactions} data={isSuccess ? transactions : []} message='No hay más transacciones.'/>
+          <DataTable columns={ColumnsUsers} data={isSuccess ? usersAdmin : []} message='No hay más transacciones.'/>
         </CardContent>
       </Card>
     </>

@@ -26,9 +26,9 @@ export interface User {
   birthday: Date
   phone_number: string
   email: string
-  password: string
   user_type: string
   is_active: number
+  verification_code: null
 }
 
 export interface UserFormData {

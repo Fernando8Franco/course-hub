@@ -1,4 +1,4 @@
-import { type UserCode, type Response, type UserFormData, type UserLogIn, type UserSession, type UserPasswords, type UserData } from '@/type'
+import { type UserCode, type Response, type UserFormData, type UserLogIn, type UserSession, type UserPasswords, type UserData, type User } from '@/type'
 import Cookies from 'js-cookie'
 
 export async function createCustomer (data: UserFormData): Promise<Response> {
@@ -189,4 +189,44 @@ export async function updatePassword (data: UserPasswords): Promise<Response> {
 
   const apiResponse = await response.json()
   return apiResponse
+}
+
+export async function getAllUsers (userType: string): Promise<User[]> {
+  if (Cookies.get('SJSWSTN') === undefined && Cookies.get('SJASWDSTMN') === undefined) throw new Error('No token')
+  const requestOptions = {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${Cookies.get('SJASWDSTMN')}`
+    }
+  }
+  const response = await fetch(`${import.meta.env.VITE_BACKEND_HOST}users/${userType}`, requestOptions)
+  if (!response.ok) {
+    const error = await response.json() as Response
+    let errorMessage = 'Hubo un problema con la solicitud.'
+    if (error.message === 'Expired token') errorMessage = 'La sesión a caducado.'
+    if (error.message === 'Wrong number of segments') errorMessage = 'Token no valido.'
+    throw new Error(errorMessage)
+  }
+  const data = await response.json()
+  return data
+}
+
+export async function deleteUser (userId: string): Promise<User[]> {
+  if (Cookies.get('SJSWSTN') === undefined && Cookies.get('SJASWDSTMN') === undefined) throw new Error('No token')
+  const requestOptions = {
+    method: 'DELETE',
+    headers: {
+      Authorization: `Bearer ${Cookies.get('SJASWDSTMN')}`
+    }
+  }
+  const response = await fetch(`${import.meta.env.VITE_BACKEND_HOST}user/${userId}`, requestOptions)
+  if (!response.ok) {
+    const error = await response.json() as Response
+    let errorMessage = 'Hubo un problema con la solicitud.'
+    if (error.message === 'Expired token') errorMessage = 'La sesión a caducado.'
+    if (error.message === 'Wrong number of segments') errorMessage = 'Token no valido.'
+    throw new Error(errorMessage)
+  }
+  const data = await response.json()
+  return data
 }

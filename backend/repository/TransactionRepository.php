@@ -279,9 +279,10 @@ class TransactionRepository {
             $result = $stmt->get_result()->fetch_assoc();
 
             if (is_null($result))
-                throw new Exception("The course with id: {$id} does not exist");
+                throw new Exception("The transaction with id: {$id} does not exist");
 
-            unlink($result['image']);
+            if (!is_null($result['image']))
+                unlink($result['image']);
 
             $stmt = Flight::db()->prepare("DELETE FROM transaction WHERE id = ?;");
             $stmt->bind_param('s', $id);

@@ -1,10 +1,11 @@
 /* eslint-disable @typescript-eslint/array-type */
 import {
   type ColumnDef,
+  type SortingState,
   flexRender,
   getCoreRowModel,
   useReactTable,
-  type VisibilityState
+  getSortedRowModel
 } from '@tanstack/react-table'
 
 import {
@@ -24,15 +25,16 @@ interface DataTableProps<TData, TValue> {
 }
 
 export function DataTable<TData, TValue> ({ columns, data, message }: DataTableProps<TData, TValue>) {
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
+  const [sorting, setSorting] = useState<SortingState>([])
   const table = useReactTable({
     data: data ?? [],
     columns,
     getCoreRowModel: getCoreRowModel(),
+    onSortingChange: setSorting,
+    getSortedRowModel: getSortedRowModel(),
     state: {
-      columnVisibility
-    },
-    onColumnVisibilityChange: setColumnVisibility
+      sorting
+    }
   })
   return (
     <div className="rounded-md border">

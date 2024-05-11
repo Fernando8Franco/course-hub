@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { toast } from '@/components/ui/use-toast'
 import Cookies from 'js-cookie'
 import { useNavigate } from 'react-router-dom'
@@ -7,11 +7,11 @@ import { getPendingTransactions, getTransactions } from '@/services/Transactions
 
 export const usePendingTransactions = () => {
   const navigate = useNavigate()
-  const { data: pendingTransactions, isError, error, isLoading, isSuccess } = useQuery({
+  const { data: pendingTransactions, isError, error, isLoading, isSuccess, refetch } = useQuery({
     queryKey: ['pending-transactions'],
     queryFn: getPendingTransactions,
-    refetchOnMount: false,
     refetchOnWindowFocus: false,
+    refetchOnMount: false,
     staleTime: Infinity,
     retry: (failureCount, error) => {
       if (error.message === 'No token') return false
@@ -26,7 +26,7 @@ export const usePendingTransactions = () => {
     if (isError) {
       if (error.message === 'No token') return
       if (error.message === 'Token no valido.') {
-        navigate('/')
+        navigate('/login', { replace: true })
         Cookies.remove('SJASWDSTMN')
         return
       }
@@ -35,21 +35,26 @@ export const usePendingTransactions = () => {
         title: 'Oh no!',
         description: error.message
       })
-      if (error.message === 'La sesión a caducado.') Cookies.remove('SJASWDSTMN')
+      if (error.message === 'La sesión a caducado.') {
+        Cookies.remove('SJASWDSTMN')
+        navigate('/login', { replace: true })
+      }
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isError])
 
-  return { pendingTransactions, isLoading, isSuccess }
+  return { pendingTransactions, isLoading, isSuccess, refetch }
 }
 
-export const useTransactions = (status: string) => {
+export const useTransactions = () => {
+  const [filter, setFilter] = useState('')
+
   const navigate = useNavigate()
-  const { data: transactions, isError, error, isLoading, isSuccess } = useQuery({
-    queryKey: ['transactions', { status }],
-    queryFn: async () => await getTransactions(status),
-    refetchOnMount: false,
+  const { data: transactions, isError, error, isLoading, isSuccess, refetch } = useQuery({
+    queryKey: ['transactions', { filter }],
+    queryFn: async () => await getTransactions(filter),
     refetchOnWindowFocus: false,
+    refetchOnMount: false,
     staleTime: Infinity,
     retry: (failureCount, error) => {
       if (error.message === 'No token') return false
@@ -64,7 +69,7 @@ export const useTransactions = (status: string) => {
     if (isError) {
       if (error.message === 'No token') return
       if (error.message === 'Token no valido.') {
-        navigate('/')
+        navigate('/login', { replace: true })
         Cookies.remove('SJASWDSTMN')
         return
       }
@@ -73,10 +78,13 @@ export const useTransactions = (status: string) => {
         title: 'Oh no!',
         description: error.message
       })
-      if (error.message === 'La sesión a caducado.') Cookies.remove('SJASWDSTMN')
+      if (error.message === 'La sesión a caducado.') {
+        Cookies.remove('SJASWDSTMN')
+        navigate('/login', { replace: true })
+      }
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isError])
 
-  return { transactions, isLoading, isSuccess }
+  return { transactions, isLoading, isSuccess, filter, setFilter, refetch }
 }
