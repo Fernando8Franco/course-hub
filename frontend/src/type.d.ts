@@ -31,6 +31,21 @@ export interface User {
   verification_code: null
 }
 
+export interface CoursesAdmin {
+  id: number
+  name: string
+  description: string
+  price: string
+  instructor: string
+  modality: string
+  image: string
+  school_name: string
+  is_active: number
+  transaction_count_pending: number
+  transaction_count_completed: string
+  transaction_count_canceled: string
+}
+
 export interface UserFormData {
   name: string
   father_last_name: string

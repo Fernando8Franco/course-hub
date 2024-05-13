@@ -13,8 +13,6 @@ export const useUsers = () => {
     queryKey: ['users', { userType }],
     queryFn: async () => await getAllUsers(userType),
     refetchOnWindowFocus: false,
-    refetchOnMount: false,
-    staleTime: Infinity,
     retry: (failureCount, error) => {
       if (error.message === 'No token') return false
       if (error.message === 'La sesión a caducado.') return false

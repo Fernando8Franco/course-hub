@@ -11,8 +11,6 @@ export const usePendingTransactions = () => {
     queryKey: ['pending-transactions'],
     queryFn: getPendingTransactions,
     refetchOnWindowFocus: false,
-    refetchOnMount: false,
-    staleTime: Infinity,
     retry: (failureCount, error) => {
       if (error.message === 'No token') return false
       if (error.message === 'La sesión a caducado.') return false
@@ -54,8 +52,6 @@ export const useTransactions = () => {
     queryKey: ['transactions', { filter }],
     queryFn: async () => await getTransactions(filter),
     refetchOnWindowFocus: false,
-    refetchOnMount: false,
-    staleTime: Infinity,
     retry: (failureCount, error) => {
       if (error.message === 'No token') return false
       if (error.message === 'La sesión a caducado.') return false

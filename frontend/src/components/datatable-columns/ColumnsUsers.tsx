@@ -60,7 +60,7 @@ export const ColumnsUsers: Array<ColumnDef<User>> = [
     }
   },
   {
-    header: () => <div className="text-center">Contacto</div>,
+    header: () => <div className="text-center">Estado</div>,
     accessorKey: 'is_active',
     cell: ({ row }) => {
       const isActive: number = row.getValue('is_active')

@@ -212,7 +212,7 @@ export async function getAllUsers (userType: string): Promise<User[]> {
 }
 
 export async function deleteUser (userId: string): Promise<User[]> {
-  if (Cookies.get('SJSWSTN') === undefined && Cookies.get('SJASWDSTMN') === undefined) throw new Error('No token')
+  if (Cookies.get('SJASWDSTMN') === undefined) throw new Error('No token')
   const requestOptions = {
     method: 'DELETE',
     headers: {
