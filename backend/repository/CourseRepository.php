@@ -29,7 +29,7 @@ class CourseRepository {
     public static function getAllByAdmin() {
         try {
             $stmt = Flight::db()->prepare("SELECT c.id, c.name, c.description, c.price, 
-            c.instructor, c.modality, c.image, s.name school_name, c.is_active,
+            c.instructor, c.modality, c.image, s.id school_id, s.name school_name, c.is_active,
             COUNT(t.id) AS transaction_count_pending,
             SUM(CASE WHEN t.transaction_state = 'COMPLETED' THEN 1 ELSE 0 END) AS transaction_count_completed,
             SUM(CASE WHEN t.transaction_state = 'CANCELED' THEN 1 ELSE 0 END) AS transaction_count_canceled
@@ -164,7 +164,9 @@ class CourseRepository {
             if (is_null($result))
                 throw new Exception("The course with id: {$id} does not exist");
 
-            unlink($result['image']);
+            if (file_exists($result['image'])) {
+                unlink($result['image']);
+            }
 
             $stmt = Flight::db()->prepare("DELETE FROM transaction WHERE course_id = ?;");
             $stmt->bind_param('i', $id);

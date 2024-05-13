@@ -2,7 +2,7 @@ import { useToast } from '@/components/ui/use-toast'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import Cookies from 'js-cookie'
 import { useNavigate } from 'react-router-dom'
-import { changeActiveCourse, deleteCourse } from '@/services/Courses'
+import { changeActiveCourse, createCourse, deleteCourse, editCourse } from '@/services/Courses'
 
 export function useMutateDeleteCourse () {
   const { toast } = useToast()
@@ -11,8 +11,6 @@ export function useMutateDeleteCourse () {
   const { mutateAsync: mutateDeleteCourse, isPending: isPendingDelete } = useMutation({
     mutationFn: deleteCourse,
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['transactions'] })
-      void queryClient.invalidateQueries({ queryKey: ['pending-transactions'] })
       void queryClient.invalidateQueries({ queryKey: ['courses-admin'] })
       toast({
         variant: 'success',
@@ -68,4 +66,62 @@ export function useMutateActiveCourse () {
   })
 
   return ({ mutateActiveCourse, isPendingActive })
+}
+
+export function useMutateCreateCourse () {
+  const { toast } = useToast()
+  const queryClient = useQueryClient()
+  const navigate = useNavigate()
+  const { mutateAsync: mutateCreateCourse, isPending: isPendingCreate } = useMutation({
+    mutationFn: createCourse,
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['courses-admin'] })
+      toast({
+        variant: 'success',
+        title: 'Curso Agregado Correctamente.'
+      })
+    },
+    onError: (error) => {
+      toast({
+        variant: 'destructive',
+        title: 'Oh no!',
+        description: error.message
+      })
+      if (error.message === 'La sesión a caducado.') {
+        Cookies.remove('SJASWDSTMN')
+        navigate('/login', { replace: true })
+      }
+    }
+  })
+
+  return ({ mutateCreateCourse, isPendingCreate })
+}
+
+export function useMutateEditCourse () {
+  const { toast } = useToast()
+  const queryClient = useQueryClient()
+  const navigate = useNavigate()
+  const { mutateAsync: mutateEditCourse, isPending: isPendingEdit } = useMutation({
+    mutationFn: editCourse,
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['courses-admin'] })
+      toast({
+        variant: 'success',
+        title: 'Curso Agregado Correctamente.'
+      })
+    },
+    onError: (error) => {
+      toast({
+        variant: 'destructive',
+        title: 'Oh no!',
+        description: error.message
+      })
+      if (error.message === 'La sesión a caducado.') {
+        Cookies.remove('SJASWDSTMN')
+        navigate('/login', { replace: true })
+      }
+    }
+  })
+
+  return ({ mutateEditCourse, isPendingEdit })
 }

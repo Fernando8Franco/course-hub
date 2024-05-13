@@ -1,6 +1,8 @@
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
+import { type CoursesAdmin } from '@/type'
+import { useEffect } from 'react'
 
 const MAX_IMAGE_SIZE_BYTES = 300 * 1024
 
@@ -32,20 +34,51 @@ const formCourseSchema = z.object({
       const file = fileList?.[0]
       return (file != null) ? file.size <= MAX_IMAGE_SIZE_BYTES : true
     }, { message: 'La imagen es demasiado grande. El tamaño máximo permitido es de 300 KB' }),
-  school_id: z.number().positive({ message: 'Curso no valido' })
+  school_id: z.string()
 })
 
-export default function useCourseForm (id?: number) {
+export type FormCourseType = z.infer<typeof formCourseSchema>
+
+const createFileListFromUrl = async (imageUrl: string): Promise<FileList | undefined> => {
+  try {
+    const response = await fetch(imageUrl)
+    const blob = await response.blob()
+
+    const file = new File([blob], 'imagen_descargada.jpg', { type: blob.type })
+
+    const fileList = new DataTransfer()
+    fileList.items.add(file)
+
+    return fileList.files
+  } catch (error) {
+    console.error('Error al descargar la imagen:', error)
+  }
+}
+
+export default function useCourseForm (data?: CoursesAdmin) {
   const formCourse = useForm<z.infer<typeof formCourseSchema>>({
     resolver: zodResolver(formCourseSchema),
     defaultValues: {
-      id,
-      name: '',
-      description: '',
-      price: '',
-      instructor: ''
+      id: data?.id ?? undefined,
+      name: data?.name ?? '',
+      description: data?.description ?? '',
+      price: data?.price ?? '',
+      instructor: data?.instructor ?? '',
+      modality: data?.modality ?? undefined,
+      school_id: data?.school_id.toString() ?? undefined
     }
   })
+
+  useEffect(() => {
+    const fetchImage = async () => {
+      if (data?.image != null) {
+        const imageFileList = await createFileListFromUrl(`${import.meta.env.VITE_BACKEND_HOST}${data.image}`)
+        formCourse.setValue('image', imageFileList)
+      }
+    }
+
+    void fetchImage()
+  }, [data, formCourse])
 
   const formCourseRef = formCourse.register('image')
 

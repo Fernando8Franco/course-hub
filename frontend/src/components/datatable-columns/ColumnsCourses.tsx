@@ -100,7 +100,7 @@ export const ColumnsCourses: Array<ColumnDef<CoursesAdmin>> = [
     cell: ({ row }) => {
       const course = row.original
       return (
-        <ActionsCourse courseId={course.id} isActive={course.is_active}/>
+        <ActionsCourse data={course}/>
       )
     }
   }

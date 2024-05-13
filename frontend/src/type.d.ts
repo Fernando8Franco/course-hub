@@ -9,10 +9,6 @@ export interface Course {
   school_name: string
 }
 
-export interface School {
-  name: string
-}
-
 export interface Response {
   status: string
   message: string
@@ -37,13 +33,25 @@ export interface CoursesAdmin {
   description: string
   price: string
   instructor: string
-  modality: string
+  modality: 'ON-SITE' | 'REMOTE' | 'HYBRID' | undefined
   image: string
+  school_id: number
   school_name: string
   is_active: number
   transaction_count_pending: number
   transaction_count_completed: string
   transaction_count_canceled: string
+}
+
+export interface CoursesData {
+  id?: number
+  name: string
+  description: string
+  price: string
+  instructor: string
+  modality: 'ON-SITE' | 'REMOTE' | 'HYBRID' | undefined
+  image: string
+  school_id: number
 }
 
 export interface UserFormData {
@@ -54,6 +62,12 @@ export interface UserFormData {
   birthday: Date
   phone_number: string
   email: string
+}
+
+export interface School {
+  id: number
+  name: string
+  is_active: number
 }
 
 export interface UserSession {

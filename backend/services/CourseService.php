@@ -38,9 +38,6 @@ class CourseService {
         try {
             $data = Flight::request()->data;
             $image = Flight::request()->files->image;
-            
-            if ($data->count() > 6)
-                throw new Exception('To many information');
         
             $this->validateData($data, ['id']);
             $this->validateImage($image);
@@ -149,7 +146,7 @@ class CourseService {
 
         list($width, $height) = getimagesize($image['tmp_name']);
 
-        if (intval($width) != 640 && intval($height) > 400)
-            throw new Exception('The only accepted resolution is 640 x 480');
+        if (intval($width) !== 750 && intval($height) !== 250)
+            throw new Exception('The only accepted resolution is 750 x 250');
     }
 }

@@ -19,9 +19,15 @@ import { ColumnsCourses } from '@/components/datatable-columns/ColumnsCourses'
 import { Button } from '@/components/ui/button'
 import { PlusCircle } from 'lucide-react'
 import { CourseForm } from '@/components/react-components/CourseForm'
+import { useState } from 'react'
 
 export default function CoursesPage () {
   const { coursesAdmin, isSuccess } = useCoursesAdmin()
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
+
+  const handleOpenChange = (nextOpenState: boolean) => {
+    setIsDialogOpen(nextOpenState)
+  }
 
   return (
     <>
@@ -37,7 +43,7 @@ export default function CoursesPage () {
         <CardContent>
           <div className='flex items-center pb-4'>
             <div className='ml-auto flex items-center gap-2"'>
-              <Dialog>
+              <Dialog open={isDialogOpen} onOpenChange={handleOpenChange}>
                 <DialogTrigger asChild>
                   <Button size="sm" className="h-8 gap-1">
                     <PlusCircle className="h-3.5 w-3.5" />
@@ -54,7 +60,7 @@ export default function CoursesPage () {
                     </DialogDescription>
                   </DialogHeader>
 
-                  <CourseForm />
+                  <CourseForm type='ADD' messages={['Agregar', 'Agregando']} handleOpenChange={handleOpenChange}/>
                 </DialogContent>
               </Dialog>
             </div>

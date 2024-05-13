@@ -4,30 +4,58 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormMessage
+  FormMessage,
+  FormDescription
 } from '@/components/ui/form'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { type z } from 'zod'
-import useCourseForm from '@/hooks/forms/useCourseForm'
+import useCourseForm, { type FormCourseType } from '@/hooks/forms/useCourseForm'
+import { useSchools } from '@/hooks/useSchools'
+import { type CoursesAdmin } from '@/type'
+import { useMutateCreateCourse, useMutateEditCourse } from '@/hooks/useMutateCourses'
 
-export function CourseForm () {
-  const { formCourseSchema, formCourse, formCourseRef } = useCourseForm()
-  // const { mutateLogin, isPendingLogin } = useMutateLogin()
-  const isPendingLogin = false
+interface Props {
+  data?: CoursesAdmin
+  type: 'ADD' | 'EDIT'
+  messages: string[]
+  handleOpenChange: (isOpen: boolean) => void
+}
 
-  async function onSubmitLoginForm (formData: z.infer<typeof formCourseSchema>) {
+export function CourseForm ({ data, type, messages, handleOpenChange }: Props) {
+  const { formCourse, formCourseRef } = useCourseForm(data ?? undefined)
+  const { schools } = useSchools()
+  const { mutateCreateCourse, isPendingCreate } = useMutateCreateCourse()
+  const { mutateEditCourse, isPendingEdit } = useMutateEditCourse()
+
+  async function onSubmitAddForm (formData: FormCourseType) {
     try {
-      console.log(formData)
+      void mutateCreateCourse(formData)
+      handleOpenChange(false)
+    } catch (e) {
+      console.log(e)
+    }
+  }
+
+  async function onSubmitEditForm (formData: FormCourseType) {
+    try {
+      void mutateEditCourse(formData)
+      handleOpenChange(false)
     } catch (e) {
       console.log(e)
     }
   }
 
   return (
-    <div className="max-w-sm">
+    <div className="max-w-sm max-h-[400px] px-4 overflow-auto custom-scroll">
       <Form {...formCourse}>
-        <form onSubmit={formCourse.handleSubmit(onSubmitLoginForm)}>
+        <form onSubmit={formCourse.handleSubmit(type === 'ADD' ? onSubmitAddForm : onSubmitEditForm)}>
           <div className='flex flex-col gap-2'>
             <FormField
               control={formCourse.control}
@@ -83,6 +111,52 @@ export function CourseForm () {
             />
             <FormField
               control={formCourse.control}
+              name="modality"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Modalidad</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccione una modalidad." />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="ON-SITE">Presencial</SelectItem>
+                      <SelectItem value="REMOTE">Remoto</SelectItem>
+                      <SelectItem value="HYBRID">Hibrido</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={formCourse.control}
+              name="school_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Escuela</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccione una escuela." />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {
+                        schools?.map((school) => {
+                          return (
+                            <SelectItem key={school.id} value={school.id.toString()}>{school.name}</SelectItem>
+                          )
+                        })
+                      }
+                    </SelectContent>
+                  </Select>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={formCourse.control}
               name="image"
               render={({ field }) => {
                 return (
@@ -100,6 +174,9 @@ export function CourseForm () {
                         }}
                       />
                     </FormControl>
+                    <FormDescription>
+                      La imagen debe de medir 250 ancho 100 largo.
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )
@@ -107,8 +184,8 @@ export function CourseForm () {
             />
           </div>
           <div className='flex flex-row justify-end pt-4'>
-            <Button type="submit" disabled={isPendingLogin}>
-              {!isPendingLogin ? 'Agregar' : 'Agregando...'}
+            <Button type="submit" disabled={isPendingCreate || isPendingEdit}>
+              {(!isPendingCreate || !isPendingEdit) ? messages[0] : messages[1]}
             </Button>
           </div>
         </form>
