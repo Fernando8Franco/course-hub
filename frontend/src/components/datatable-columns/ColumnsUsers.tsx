@@ -5,7 +5,7 @@ import { Button } from '../ui/button'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { Badge } from '../ui/badge'
-import DeleteUserDialog from '../react-components/DeleteUserDialog'
+import ActionsUsers from '../react-components/ActionsUser'
 
 export const ColumnsUsers: Array<ColumnDef<User>> = [
   {
@@ -78,7 +78,7 @@ export const ColumnsUsers: Array<ColumnDef<User>> = [
     cell: ({ row }) => {
       const user = row.original
       return (
-        <DeleteUserDialog userId={user.id}/>
+        <ActionsUsers data={user}/>
       )
     }
   }

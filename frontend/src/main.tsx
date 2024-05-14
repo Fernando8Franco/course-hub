@@ -31,6 +31,7 @@ const DashboardPage = lazy(async () => await import('./pages/AdminPages/Dashboar
 const TransactionsPage = lazy(async () => await import('./pages/AdminPages/TransactionsPage.tsx'))
 const UsersPage = lazy(async () => await import('./pages/AdminPages/UsersPage.tsx'))
 const CoursesPage = lazy(async () => await import('./pages/AdminPages/CoursesPage.tsx'))
+const SchoolsPage = lazy(async () => await import('./pages/AdminPages/SchoolsPage.tsx'))
 
 const router = createBrowserRouter(
   [
@@ -167,7 +168,10 @@ const router = createBrowserRouter(
             },
             {
               path: '/admin/dashboard/schools',
-              element: <h1>Trnas</h1>
+              element:
+                <Suspense>
+                  <SchoolsPage />
+                </Suspense>
             }
           ]
         }

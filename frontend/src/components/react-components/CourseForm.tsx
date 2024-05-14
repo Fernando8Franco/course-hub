@@ -175,7 +175,7 @@ export function CourseForm ({ data, type, messages, handleOpenChange }: Props) {
                       />
                     </FormControl>
                     <FormDescription>
-                      La imagen debe de medir 250 ancho 100 largo.
+                      La imagen debe de medir 750x250 px.
                     </FormDescription>
                     <FormMessage />
                   </FormItem>

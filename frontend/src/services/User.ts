@@ -211,7 +211,7 @@ export async function getAllUsers (userType: string): Promise<User[]> {
   return data
 }
 
-export async function deleteUser (userId: string): Promise<User[]> {
+export async function deleteUser (userId: string): Promise<Response> {
   if (Cookies.get('SJASWDSTMN') === undefined) throw new Error('No token')
   const requestOptions = {
     method: 'DELETE',
@@ -220,6 +220,26 @@ export async function deleteUser (userId: string): Promise<User[]> {
     }
   }
   const response = await fetch(`${import.meta.env.VITE_BACKEND_HOST}user/${userId}`, requestOptions)
+  if (!response.ok) {
+    const error = await response.json() as Response
+    let errorMessage = 'Hubo un problema con la solicitud.'
+    if (error.message === 'Expired token') errorMessage = 'La sesión a caducado.'
+    if (error.message === 'Wrong number of segments') errorMessage = 'Token no valido.'
+    throw new Error(errorMessage)
+  }
+  const data = await response.json()
+  return data
+}
+
+export async function activateUser (params: { userId: string, state: number }): Promise<Response> {
+  if (Cookies.get('SJASWDSTMN') === undefined) throw new Error('No token')
+  const requestOptions = {
+    method: 'PUT',
+    headers: {
+      Authorization: `Bearer ${Cookies.get('SJASWDSTMN')}`
+    }
+  }
+  const response = await fetch(`${import.meta.env.VITE_BACKEND_HOST}user/${params.userId}/${params.state}`, requestOptions)
   if (!response.ok) {
     const error = await response.json() as Response
     let errorMessage = 'Hubo un problema con la solicitud.'

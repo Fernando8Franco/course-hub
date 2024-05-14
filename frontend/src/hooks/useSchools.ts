@@ -1,15 +1,13 @@
 import { useQuery } from '@tanstack/react-query'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { toast } from '@/components/ui/use-toast'
 import Cookies from 'js-cookie'
 import { useNavigate } from 'react-router-dom'
 import { getSchools } from '@/services/Schools'
 
 export const useSchools = () => {
-  const [userType, setUserType] = useState('customer')
-
   const navigate = useNavigate()
-  const { data: schools, isError, error, isLoading, isSuccess, refetch } = useQuery({
+  const { data: schools, isError, error, isLoading, isSuccess } = useQuery({
     queryKey: ['schools'],
     queryFn: getSchools,
     refetchOnWindowFocus: false,
@@ -43,5 +41,5 @@ export const useSchools = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isError])
 
-  return { schools, isLoading, isSuccess, userType, setUserType, refetch }
+  return { schools, isLoading, isSuccess }
 }

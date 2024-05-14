@@ -57,7 +57,7 @@ class SchoolService {
             $data = Flight::request()->data;
             if (empty($data->id))
                 throw new Exception('The field id can not be empty');
-            if (!ctype_digit($data->id))
+            if (!ctype_digit((string)$data->id))
                 throw new Exception('Not valid id');
             if (empty($data->name))
                 throw new Exception('The field name can not be empty');
