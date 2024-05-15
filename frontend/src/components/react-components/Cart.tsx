@@ -27,7 +27,7 @@ export default function Cart ({ course }: Props) {
         <div className='flex px-1 items-center justify-center text-center text-sm h-[49px]'>
           {course.school_name}
         </div>
-        <img src={'http://localhost:8080/backend/' + course.image} alt="Course Image" className="relative top-0 left-0 w-[250.4px] h-[100px] object-cover rounded" />
+        <img src={import.meta.env.VITE_BACKEND_HOST + course.image} alt="Course Image" className="relative top-0 left-0 w-[250.4px] h-[100px] object-cover rounded" />
         <CardTitle className="h-[85px] overflow-auto flex items-center custom-scroll">
           {course.name}
         </CardTitle>

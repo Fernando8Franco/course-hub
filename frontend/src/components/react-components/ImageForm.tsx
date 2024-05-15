@@ -61,7 +61,7 @@ export default function ImageForm ({ transactionId }: Props) {
           <SheetTitle>Suba su imagen de su recibo y envíenla</SheetTitle>
         </SheetHeader>
           <Form {...formImageTransaction}>
-            <form onSubmit={formImageTransaction.handleSubmit(onSubmit)} className="max-w-sm">
+            <form onSubmit={formImageTransaction.handleSubmit(onSubmit)} className="max-w-sm" encType='multipart/form-data'>
               <FormField
                 control={formImageTransaction.control}
                 name="image"

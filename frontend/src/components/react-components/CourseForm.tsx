@@ -55,7 +55,7 @@ export function CourseForm ({ data, type, messages, handleOpenChange }: Props) {
   return (
     <div className="max-w-sm max-h-[400px] px-4 overflow-auto custom-scroll">
       <Form {...formCourse}>
-        <form onSubmit={formCourse.handleSubmit(type === 'ADD' ? onSubmitAddForm : onSubmitEditForm)}>
+        <form onSubmit={formCourse.handleSubmit(type === 'ADD' ? onSubmitAddForm : onSubmitEditForm)} encType='multipart/form-data'>
           <div className='flex flex-col gap-2'>
             <FormField
               control={formCourse.control}

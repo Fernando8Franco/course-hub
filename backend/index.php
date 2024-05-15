@@ -114,4 +114,14 @@ Flight::route('GET /txn-img/@id', function($id) {
     }
 });
 
+Flight::route('GET /payment-img/@id', function($id) {
+    $ruta_imagen = 'payment-img/' . $id;
+    if (file_exists($ruta_imagen)) {
+        header('Content-Type: image/jpeg');
+        readfile($ruta_imagen);
+    } else {
+        echo 'Image not found';
+    }
+});
+
 Flight::start();

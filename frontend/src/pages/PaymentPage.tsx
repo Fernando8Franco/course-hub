@@ -15,8 +15,8 @@ export default function PaymentPage () {
         <CardTitle>Fromas de pago</CardTitle>
         <CardDescription>Siguientes formas de pago aceptadas</CardDescription>
       </CardHeader>
-      <CardContent className='grid grid-cols-1 lg:grid-cols-2 gap-4'>
-        <Card>
+      <CardContent className='flex flex-wrap gap-4 justify-center'>
+        <Card className='max-w-sm'>
           <CardHeader>
             <CardTitle>
               <div>
@@ -27,15 +27,10 @@ export default function PaymentPage () {
             </CardTitle>
           </CardHeader>
           <CardContent className='flex flex-col gap-4 pb-8'>
-            <div className="text-center text-lg font-semibold">
-              Nombre: Juan Pérez Pérez
-            </div>
-            <div className="text-center text-lg font-semibold">
-              CLABE: 123456789123456789
-            </div>
+          <img src={import.meta.env.VITE_BACKEND_HOST + 'payment-img/banco.png'} alt="Course Image" className="top-0 left-0 w-[250px] object-cover rounded" />
           </CardContent>
         </Card>
-        <Card>
+        <Card className='max-w-sm'>
           <CardHeader>
             <CardTitle>
               <div>
@@ -46,12 +41,7 @@ export default function PaymentPage () {
             </CardTitle>
           </CardHeader>
           <CardContent className='flex flex-col gap-4 pb-8'>
-            <div className="text-center text-lg font-semibold">
-              Nombre: Juan Pérez Pérez
-            </div>
-            <div className="text-center text-lg font-semibold">
-              CLABE: 123456789123456789
-            </div>
+            <img src={import.meta.env.VITE_BACKEND_HOST + 'payment-img/transferencia.png'} alt="Course Image" className="top-0 left-0 w-[250px] object-cover rounded" />
           </CardContent>
         </Card>
       </CardContent>
